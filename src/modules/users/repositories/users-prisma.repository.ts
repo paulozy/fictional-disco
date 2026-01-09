@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaRepository } from '../../../shared/repositories/prisma-repository';
 import { User } from '../entities/user.entity';
-import { UsersRepository, CreateUserProps, UpdateUserProps } from './users-repository.interface';
+import { CreateUserProps, UpdateUserProps, UsersRepository } from './users-repository.interface';
 
 export class UsersPrismaRepository
   extends PrismaRepository<User, CreateUserProps, UpdateUserProps>

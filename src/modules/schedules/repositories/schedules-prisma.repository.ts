@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaRepository } from '../../../shared/repositories/prisma-repository';
 import { Schedule } from '../entities/schedule.entity';
-import { SchedulesRepository, CreateScheduleProps, UpdateScheduleProps } from './schedules-repository.interface';
+import { CreateScheduleProps, SchedulesRepository, UpdateScheduleProps } from './schedules-repository.interface';
 
 export class SchedulesPrismaRepository
   extends PrismaRepository<Schedule, CreateScheduleProps, UpdateScheduleProps>

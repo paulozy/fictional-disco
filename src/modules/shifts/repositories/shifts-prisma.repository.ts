@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaRepository } from '../../../shared/repositories/prisma-repository';
 import { Shift } from '../entities/shift.entity';
-import { ShiftsRepository, CreateShiftProps, UpdateShiftProps } from './shifts-repository.interface';
+import { CreateShiftProps, ShiftsRepository, UpdateShiftProps } from './shifts-repository.interface';
 
 export class ShiftsPrismaRepository
   extends PrismaRepository<Shift, CreateShiftProps, UpdateShiftProps>
