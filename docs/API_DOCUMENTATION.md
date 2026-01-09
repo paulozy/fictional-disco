@@ -615,6 +615,134 @@ curl -X POST http://localhost:3000/employees \
 
 ---
 
+## 💳 BILLING
+
+#### 1. Criar Checkout para Upgrade PRO
+```
+POST /billing/checkout
+```
+**Autenticação:** ✅ Requerida
+
+**Descrição:** Cria um checkout para upgrade para o plano PRO. Retorna um link de pagamento do AbacatePay.
+
+**Request Body:**
+```json
+{
+  "plan": "PRO"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "checkoutUrl": "https://checkout.abacatepay.com/subscription-uuid",
+  "subscriptionId": "sub-uuid"
+}
+```
+
+**Erros:**
+- `400` - Plano inválido ou ausente
+- `401` - Token não fornecido ou inválido
+- `500` - Erro ao gerar checkout
+
+---
+
+#### 2. Webhook de Pagamento
+```
+POST /billing/webhook
+```
+**Autenticação:** ❌ Não requerida (validada por signature)
+
+**Descrição:** Endpoint para receber notificações do AbacatePay sobre mudanças de status de subscriptions.
+
+**Request Body (enviado pelo AbacatePay):**
+```json
+{
+  "customerId": "customer-abc123",
+  "subscriptionId": "sub-def456",
+  "status": "ACTIVE"
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "message": "Subscription updated to ACTIVE"
+}
+```
+
+**Status possíveis:**
+- `ACTIVE` - Pagamento confirmado, subscription ativa
+- `CANCELLED` - Subscription cancelada
+- `FAILED` - Falha no pagamento
+
+---
+
+#### 3. Verificar Status da Subscription
+```
+GET /billing/status
+```
+**Autenticação:** ✅ Requerida
+
+**Descrição:** Retorna o status atual da subscription da empresa autenticada.
+
+**Response (200 OK):**
+```json
+{
+  "id": "sub-uuid",
+  "companyId": "company-uuid",
+  "plan": "PRO",
+  "status": "ACTIVE",
+  "paymentGatewayCustomerId": "customer-abc123",
+  "paymentGatewaySubscriptionId": "sub-def456",
+  "createdAt": "2026-01-09T02:00:00.000Z"
+}
+```
+
+Se a empresa não tem subscription:
+```json
+{
+  "id": "",
+  "companyId": "company-uuid",
+  "plan": "FREE",
+  "status": "ACTIVE",
+  "createdAt": "2026-01-09T02:00:00.000Z"
+}
+```
+
+**Erros:**
+- `401` - Token não fornecido ou inválido
+- `500` - Erro interno do servidor
+
+---
+
+### Planos Disponíveis
+
+#### FREE (Padrão)
+- Funcionalidades básicas
+- Sem custo
+- Sem pagamento requerido
+
+#### PRO
+- Funcionalidades avançadas
+- Relatórios detalhados
+- Suporte prioritário
+- Requer pagamento mensal via AbacatePay
+
+---
+
+### Fluxo de Pagamento
+1. Empresa faz login
+2. Acessa `POST /billing/checkout` com `plan: "PRO"`
+3. Recebe `checkoutUrl` e abre no navegador
+4. Completa pagamento no AbacatePay
+5. AbacatePay envia webhook para `POST /billing/webhook`
+6. Sistema atualiza status para `ACTIVE`
+7. Empresa pode verificar status em `GET /billing/status`
+
+---
+
 ## ⚠️ Notas Importantes
 
 1. **Token JWT**: Válido por 24 horas

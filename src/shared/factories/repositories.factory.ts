@@ -1,4 +1,5 @@
 import { Database } from '../../infra/database/database';
+import { SubscriptionsPrismaRepository } from '../../modules/billing/repositories/subscriptions-prisma.repository';
 import { CompaniesPrismaRepository } from '../../modules/companies/repositories/companies-prisma.repository';
 import { EmployeesPrismaRepository } from '../../modules/employees/repositories/employees-prisma.repository';
 import { SchedulesPrismaRepository } from '../../modules/schedules/repositories/schedules-prisma.repository';
@@ -24,6 +25,10 @@ export class RepositoriesFactory {
 
   static getShiftsRepository() {
     return new ShiftsPrismaRepository(Database.getInstance());
+  }
+
+  static getSubscriptionsRepository() {
+    return new SubscriptionsPrismaRepository(Database.getInstance());
   }
 
   static async disconnect(): Promise<void> {

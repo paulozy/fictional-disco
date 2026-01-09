@@ -20,9 +20,10 @@ model Company {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users     User[]
-  employees Employee[]
-  schedules Schedule[]
+  users        User[]
+  employees    Employee[]
+  schedules    Schedule[]
+  subscription Subscription?
 
   @@map("companies")
 }
@@ -95,4 +96,21 @@ model Shift {
   @@index([scheduleId])
   @@index([employeeId])
   @@map("shifts")
+}
+
+model Subscription {
+  id                           String   @id @default(cuid())
+  companyId                    String   @unique
+  plan                         String   @default("FREE") // FREE | PRO
+  status                       String   @default("INACTIVE") // ACTIVE | INACTIVE
+  paymentGatewayCustomerId     String?  @unique
+  paymentGatewaySubscriptionId String?
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([paymentGatewayCustomerId])
+  @@map("subscriptions")
 }

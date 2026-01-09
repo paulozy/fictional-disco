@@ -29,6 +29,11 @@ import { DeleteShiftUseCase } from '../../modules/shifts/usecases/delete-shift.u
 // Auth
 import { AuthenticateUserUseCase } from '../../modules/auth/usecases/authenticate-user.usecase';
 
+// Billing
+import { CreateCheckoutUseCase } from '../../modules/billing/usecases/create-checkout.usecase';
+import { GetSubscriptionStatusUseCase } from '../../modules/billing/usecases/get-subscription-status.usecase';
+import { HandleWebhookUseCase } from '../../modules/billing/usecases/handle-webhook.usecase';
+
 const bcryptEncrypter = new BcryptEncrypter();
 const jwtTokenGenerator = new JwtTokenGenerator();
 
@@ -126,6 +131,25 @@ export class UseCasesFactory {
       RepositoriesFactory.getUsersRepository(),
       bcryptEncrypter,
       jwtTokenGenerator,
+    );
+  }
+
+  // Billing
+  static createCheckoutUseCase(): CreateCheckoutUseCase {
+    return new CreateCheckoutUseCase(
+      RepositoriesFactory.getSubscriptionsRepository(),
+    );
+  }
+
+  static handleWebhookUseCase(): HandleWebhookUseCase {
+    return new HandleWebhookUseCase(
+      RepositoriesFactory.getSubscriptionsRepository(),
+    );
+  }
+
+  static getSubscriptionStatusUseCase(): GetSubscriptionStatusUseCase {
+    return new GetSubscriptionStatusUseCase(
+      RepositoriesFactory.getSubscriptionsRepository(),
     );
   }
 }

@@ -27,6 +27,11 @@ import { DeleteShiftController } from '../../modules/shifts/controllers/delete-s
 // Auth
 import { AuthenticateUserController } from '../../modules/auth/controllers/authenticate-user.controller';
 
+// Billing
+import { CreateCheckoutController } from '../../modules/billing/controllers/create-checkout.controller';
+import { GetSubscriptionStatusController } from '../../modules/billing/controllers/get-subscription-status.controller';
+import { WebhookController } from '../../modules/billing/controllers/webhook.controller';
+
 export class ControllersFactory {
   // Companies
   static createCompanyController(): CreateCompanyController {
@@ -99,6 +104,23 @@ export class ControllersFactory {
   static authenticateUserController(): AuthenticateUserController {
     return new AuthenticateUserController(
       UseCasesFactory.authenticateUserUseCase(),
+    );
+  }
+
+  // Billing
+  static createCheckoutController(): CreateCheckoutController {
+    return new CreateCheckoutController(
+      UseCasesFactory.createCheckoutUseCase(),
+    );
+  }
+
+  static webhookController(): WebhookController {
+    return new WebhookController(UseCasesFactory.handleWebhookUseCase());
+  }
+
+  static getSubscriptionStatusController(): GetSubscriptionStatusController {
+    return new GetSubscriptionStatusController(
+      UseCasesFactory.getSubscriptionStatusUseCase(),
     );
   }
 }
