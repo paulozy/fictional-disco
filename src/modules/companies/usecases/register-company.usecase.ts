@@ -1,5 +1,6 @@
 import { Encrypter } from '../../../shared/cryptography/encrypter.interface';
 import { TokenGenerator } from '../../../shared/cryptography/token-generator.interface';
+import { BillingClientFactory } from '../../../shared/factories/billing-client.factory';
 import { UseCase } from '../../../shared/usecases/base-use-case';
 import { UsersRepository } from '../../users/repositories/users-repository.interface';
 import { CompaniesRepository } from '../repositories/companies-repository.interface';
@@ -42,6 +43,7 @@ export class RegisterCompanyUseCase implements UseCase<RegisterCompanyRequest, R
     }
 
     const hashedPassword = await this.encrypter.hash(request.adminPassword);
+    const billingClient = BillingClientFactory.getInstance();
 
     try {
       const company = await this.companiesRepository.create({
@@ -50,35 +52,50 @@ export class RegisterCompanyUseCase implements UseCase<RegisterCompanyRequest, R
       });
 
       try {
-        const user = await this.usersRepository.create({
-          email: request.adminEmail,
-          password: hashedPassword,
-          role: 'admin',
-          companyId: company.id,
+        const { customerId } = await billingClient.createCustomer(company);
+
+        const updatedCompany = await this.companiesRepository.update(company.id, {
+          paymentGatewayCustomerId: customerId,
         });
 
-        const token = await this.tokenGenerator.generate({
-          userId: user.id,
-          email: user.email,
-          companyId: user.companyId,
-          role: user.role,
-        });
+        try {
+          const user = await this.usersRepository.create({
+            email: request.adminEmail,
+            password: hashedPassword,
+            role: 'admin',
+            companyId: updatedCompany.id,
+          });
 
-        return {
-          company: {
-            id: company.id,
-            name: company.name,
-            segment: company.segment,
-            createdAt: company.createdAt,
-          },
-          user: {
-            id: user.id,
+          const token = await this.tokenGenerator.generate({
+            userId: user.id,
             email: user.email,
-            role: user.role,
             companyId: user.companyId,
-          },
-          token,
-        };
+            role: user.role,
+          });
+
+          return {
+            company: {
+              id: updatedCompany.id,
+              name: updatedCompany.name,
+              segment: updatedCompany.segment,
+              createdAt: updatedCompany.createdAt,
+            },
+            user: {
+              id: user.id,
+              email: user.email,
+              role: user.role,
+              companyId: user.companyId,
+            },
+            token,
+          };
+        } catch (error) {
+          try {
+            await this.companiesRepository.delete(company.id);
+          } catch (deleteError) {
+            console.error('Failed to rollback company creation:', deleteError);
+          }
+          throw error;
+        }
       } catch (error) {
         try {
           await this.companiesRepository.delete(company.id);

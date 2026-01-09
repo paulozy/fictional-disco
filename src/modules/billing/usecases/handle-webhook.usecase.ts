@@ -22,7 +22,6 @@ export class HandleWebhookUseCase implements UseCase<HandleWebhookRequest, Handl
   async execute(request: HandleWebhookRequest): Promise<HandleWebhookResponse> {
     const { payload } = request;
 
-    // Find subscription by payment gateway customer ID
     const subscription = await this.subscriptionsRepository.findByPaymentGatewayCustomerId(
       payload.customerId
     );
@@ -34,7 +33,6 @@ export class HandleWebhookUseCase implements UseCase<HandleWebhookRequest, Handl
       };
     }
 
-    // Update subscription status based on webhook
     const newStatus = payload.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE';
 
     await this.subscriptionsRepository.update(subscription.id, {

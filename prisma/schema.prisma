@@ -14,17 +14,19 @@ datasource db {
 }
 
 model Company {
-  id        String   @id @default(cuid())
-  name      String
-  segment   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                       String   @id @default(cuid())
+  name                     String
+  segment                  String
+  paymentGatewayCustomerId String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
 
   users        User[]
   employees    Employee[]
   schedules    Schedule[]
   subscription Subscription?
 
+  @@index([paymentGatewayCustomerId])
   @@map("companies")
 }
 

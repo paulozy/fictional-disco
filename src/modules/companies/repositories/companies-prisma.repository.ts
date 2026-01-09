@@ -43,6 +43,7 @@ export class CompaniesPrismaRepository
       data: {
         name: props.name,
         segment: props.segment,
+        paymentGatewayCustomerId: props.paymentGatewayCustomerId,
       },
     });
 
@@ -60,6 +61,7 @@ export class CompaniesPrismaRepository
       id: raw.id,
       name: raw.name,
       segment: raw.segment,
+      paymentGatewayCustomerId: raw.paymentGatewayCustomerId,
       createdAt: raw.createdAt,
     });
   }
@@ -69,6 +71,7 @@ export class CompaniesPrismaRepository
       id: entity.id,
       name: entity.name,
       segment: entity.segment,
+      paymentGatewayCustomerId: entity.paymentGatewayCustomerId,
       createdAt: entity.createdAt,
     };
   }

@@ -1,0 +1,67 @@
+
+import Stripe from "stripe";
+import { Company } from "../../modules/companies/entities/company.entity";
+import { BillingClient } from "./billing-client.interface";
+
+export class StripeBillingClient implements BillingClient {
+  private stripe: Stripe;
+  private readonly successUrl: string;
+  private readonly cancelUrl: string;
+
+  constructor() {
+    const apiKey = process.env.BILLING_API_KEY
+    const successUrl = process.env.BILLING_SUCCESS_URL || "http://localhost:3000/success";
+    const cancelUrl = process.env.BILLING_CANCEL_URL || "http://localhost:3000/cancel";
+
+    if (!apiKey) {
+      throw new Error("BILLING_API_KEY is not defined in environment variables");
+    }
+    this.stripe = new Stripe(apiKey, { apiVersion: "2025-12-15.clover" });
+    this.successUrl = successUrl;
+    this.cancelUrl = cancelUrl;
+  }
+
+  async createCustomer(company: Company): Promise<{ customerId: string }> {
+    const customer = await this.stripe.customers.create({
+      name: company.name,
+      metadata: {
+        companyId: company.id,
+      },
+    });
+
+    return {
+      customerId: customer.id,
+    };
+  }
+
+  async createCheckout(company: Company, plan: string): Promise<{ checkoutUrl: string; subscriptionId: string }> {
+    const session = await this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [
+        {
+          price: plan === 'PRO' ? 'price_1SeIMRRFGmIDYGv3Xl8bX0qY' : '',
+          quantity: 1,
+        },
+      ],
+      metadata: { companyId: company.id },
+      success_url: `${this.successUrl + '?session_id={CHECKOUT_SESSION_ID}'}`,
+      cancel_url: this.cancelUrl,
+      customer: company.paymentGatewayCustomerId
+    });
+
+    if (!session.url || !session.subscription) {
+      throw new Error("Failed to create Stripe Checkout session");
+    }
+
+    return {
+      checkoutUrl: session.url,
+      subscriptionId: session.subscription.toString(),
+    };
+  }
+
+  async handleWebhook(payload: any): Promise<void> {
+    // Implementar handling de webhooks do Stripe quando necessário
+    // Por enquanto, apenas stub
+  }
+}

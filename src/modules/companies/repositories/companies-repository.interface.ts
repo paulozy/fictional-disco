@@ -4,11 +4,13 @@ import { Company } from '../entities/company.entity';
 export interface CreateCompanyProps {
   name: string;
   segment: string;
+  paymentGatewayCustomerId?: string;
 }
 
 export interface UpdateCompanyProps {
   name?: string;
   segment?: string;
+  paymentGatewayCustomerId?: string;
 }
 
 export interface CompaniesRepository extends Repository<Company, CreateCompanyProps, UpdateCompanyProps> {

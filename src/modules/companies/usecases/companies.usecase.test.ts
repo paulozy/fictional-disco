@@ -1,4 +1,6 @@
 import { TokenGenerator } from '../../../shared/cryptography/token-generator.interface';
+import { BillingClientFactory } from '../../../shared/factories/billing-client.factory';
+import { FakeBillingClient } from '../../../shared/testing/fake-billing-client';
 import { FakeEncrypter } from '../../../shared/testing/fake-encrypter';
 import { InMemoryUsersRepository } from '../../users/repositories/in-memory-users.repository';
 import { InMemoryCompaniesRepository } from '../repositories/in-memory-companies.repository';
@@ -21,6 +23,7 @@ describe('Companies Usecases', () => {
   let usersRepository: InMemoryUsersRepository;
   let encrypter: FakeEncrypter;
   let tokenGenerator: FakeTokenGenerator;
+  let billingClient: FakeBillingClient;
   let createCompanyUseCase: CreateCompanyUseCase;
   let getMyCompanyUseCase: GetMyCompanyUseCase;
   let registerCompanyUseCase: RegisterCompanyUseCase;
@@ -30,6 +33,11 @@ describe('Companies Usecases', () => {
     usersRepository = new InMemoryUsersRepository();
     encrypter = new FakeEncrypter();
     tokenGenerator = new FakeTokenGenerator();
+    billingClient = new FakeBillingClient();
+
+    // Set fake billing client for tests
+    BillingClientFactory.setInstance(billingClient);
+
     createCompanyUseCase = new CreateCompanyUseCase(companiesRepository);
     getMyCompanyUseCase = new GetMyCompanyUseCase(companiesRepository);
     registerCompanyUseCase = new RegisterCompanyUseCase(
@@ -38,6 +46,11 @@ describe('Companies Usecases', () => {
       encrypter,
       tokenGenerator,
     );
+  });
+
+  afterEach(() => {
+    // Reset billing client after each test
+    BillingClientFactory.reset();
   });
 
   describe('CreateCompanyUseCase', () => {
