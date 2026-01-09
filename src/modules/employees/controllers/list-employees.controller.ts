@@ -1,5 +1,5 @@
 import { Controller, HttpRequest, HttpResponse } from '../../../shared/http/controller';
-import { ListEmployeesUseCase } from './list-employees.usecase';
+import { ListEmployeesUseCase } from '../usecases/list-employees.usecase';
 
 export class ListEmployeesController extends Controller {
   constructor(private listEmployeesUseCase: ListEmployeesUseCase) {

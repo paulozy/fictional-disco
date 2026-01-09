@@ -9,7 +9,7 @@ export class UpdateEmployeeController extends Controller {
   async handle(request: HttpRequest): Promise<HttpResponse> {
     try {
       const employeeId = request.params?.employeeId;
-      const { name, role, phone, active, workStartTime, workEndTime, workDays } = request.body;
+      const { name, role, phone, workStartTime, workEndTime, workDays } = request.body;
 
       if (!employeeId) {
         return this.badRequest('Employee ID is required');
@@ -20,7 +20,6 @@ export class UpdateEmployeeController extends Controller {
         name,
         role,
         phone,
-        active,
         workStartTime,
         workEndTime,
         workDays,

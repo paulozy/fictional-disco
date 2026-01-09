@@ -8,13 +8,13 @@ export class GetMyCompanyController extends Controller {
 
   async handle(request: HttpRequest): Promise<HttpResponse> {
     try {
-      const userId = request.headers?.userId;
+      const companyId = request.headers?.companyId;
 
-      if (!userId) {
-        return this.unauthorized('User not authenticated');
+      if (!companyId) {
+        return this.unauthorized('Company ID not provided');
       }
 
-      const result = await this.getMyCompanyUseCase.execute({ userId });
+      const result = await this.getMyCompanyUseCase.execute({ companyId });
 
       if (!result) {
         return this.notFound('Company not found');
