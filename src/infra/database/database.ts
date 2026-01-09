@@ -1,3 +1,4 @@
+import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
 export class Database {
@@ -7,7 +8,19 @@ export class Database {
 
   static getInstance(): PrismaClient {
     if (!Database.instance) {
-      Database.instance = new PrismaClient();
+      const connectionString = process.env.DATABASE_URL;
+      if (!connectionString) {
+        throw new Error('DATABASE_URL environment variable is not set');
+      }
+
+      const adapter = new PrismaPg({
+        connectionString,
+      });
+
+      Database.instance = new PrismaClient({
+        adapter,
+        log: ['query', 'info', 'warn', 'error'],
+      });
     }
     return Database.instance;
   }
