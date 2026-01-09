@@ -11,13 +11,22 @@ Obtém schedules semanais com auto-criação:
 - Calcula automaticamente weekEnd (weekStart + 6 dias)
 - Endpoint: `GET /schedules/:weekStart`
 
+### � Billing & Payment Gateway
+Sistema de billing integrado com Stripe:
+- Criação automática de customer no Stripe ao criar empresa
+- Planos: FREE (padrão) e PRO (pago)
+- Webhook para atualizar status de pagamento
+- Endpoint de checkout para upgrade
+- Rollback automático se criação de customer falhar
+
 ### 📦 Módulos
-- **Companies** - Gerenciar empresas
+- **Companies** - Gerenciar empresas com integração de pagamento
 - **Users** - Usuários do sistema (admin/manager)
 - **Employees** - Funcionários com detalhes de horários
 - **Schedules** - Escalas semanais
 - **Shifts** - Turnos individuais
 - **Auth** - Autenticação com JWT
+- **Billing** - Sistema de pagamento e subscriptions
 
 ## 🛠 Stack Tecnológico
 
@@ -33,11 +42,12 @@ Obtém schedules semanais com auto-criação:
 ## 📊 Estatísticas
 
 ```
-✅ 28 testes passando (7 suites)
-✅ 14 usecases implementados
-✅ 83 arquivos compilados em 83.54ms
+✅ 34 testes passando (8 suites)
+✅ 17 usecases implementados
+✅ 100 arquivos compilados em ~90ms
 ✅ Zero erros TypeScript
-✅ API HTTP completa (6 módulos)
+✅ API HTTP completa (7 módulos)
+✅ Integração com Stripe
 ✅ CORS habilitado (ngrok ready)
 ```
 
