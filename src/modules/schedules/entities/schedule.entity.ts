@@ -10,9 +10,9 @@ export class Schedule extends BaseEntity {
   companyId: string;
 
   private constructor(
-    id: string,
     weekStart: Date,
     companyId: string,
+    id?: string,
     createdAt: Date = new Date()
   ) {
     super(id, createdAt);
@@ -22,9 +22,9 @@ export class Schedule extends BaseEntity {
 
   static create(props: ScheduleProps): Schedule {
     return new Schedule(
-      props.id,
       props.weekStart,
       props.companyId,
+      props.id,
       props.createdAt
     );
   }
