@@ -1,5 +1,5 @@
 import { Controller, HttpRequest, HttpResponse } from '../../../shared/http/controller';
-import { AutoGenerateScheduleUseCase } from './auto-generate-schedule.usecase';
+import { AutoGenerateScheduleUseCase } from '../usecases/auto-generate-schedule.usecase';
 
 export class AutoGenerateScheduleController extends Controller {
   constructor(private autoGenerateScheduleUseCase: AutoGenerateScheduleUseCase) {
