@@ -36,6 +36,7 @@ export async function authMiddleware(
 
     const payload = await jwtTokenGenerator.verify(token);
     req.user = payload;
+    console.log("🚀 ~ authMiddleware ~ payload:", payload)
 
     next();
   } catch (error) {
