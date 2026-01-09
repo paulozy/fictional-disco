@@ -1,0 +1,92 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id        String   @id @default(cuid())
+  name      String
+  segment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users     User[]
+  employees Employee[]
+  schedules Schedule[]
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  role      String // admin | manager
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([email])
+}
+
+model Employee {
+  id            String   @id @default(cuid())
+  name          String
+  role          String
+  phone         String
+  active        Boolean  @default(true)
+  workStartTime String // HH:mm format
+  workEndTime   String // HH:mm format
+  workDays      Int[] // 0-6 (Sunday to Saturday)
+  companyId     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  shifts  Shift[]
+
+  @@index([companyId])
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  weekStart DateTime
+  companyId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  shifts  Shift[]
+
+  @@index([companyId])
+  @@index([weekStart])
+}
+
+model Shift {
+  id         String   @id @default(cuid())
+  dayOfWeek  Int // 0-6 (Sunday to Saturday)
+  startTime  String // HH:mm format
+  endTime    String // HH:mm format
+  scheduleId String
+  employeeId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  schedule Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([scheduleId, employeeId, dayOfWeek])
+  @@index([scheduleId])
+  @@index([employeeId])
+}
