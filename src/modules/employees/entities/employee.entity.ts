@@ -22,7 +22,6 @@ export class Employee extends BaseEntity {
   companyId: string;
 
   private constructor(
-    id: string,
     name: string,
     role: string,
     phone: string,
@@ -31,6 +30,7 @@ export class Employee extends BaseEntity {
     workEndTime: string,
     workDays: number[],
     companyId: string,
+    id?: string,
     createdAt: Date = new Date()
   ) {
     super(id, createdAt);
@@ -46,7 +46,6 @@ export class Employee extends BaseEntity {
 
   static create(props: EmployeeProps): Employee {
     return new Employee(
-      props.id,
       props.name,
       props.role,
       props.phone,
@@ -55,6 +54,7 @@ export class Employee extends BaseEntity {
       props.workEndTime,
       props.workDays,
       props.companyId,
+      props.id,
       props.createdAt
     );
   }
