@@ -1,4 +1,4 @@
-import { Database } from '../../database/database';
+import { Database } from '../../infra/database/database';
 import { CompaniesPrismaRepository } from '../../modules/companies/repositories/companies-prisma.repository';
 import { EmployeesPrismaRepository } from '../../modules/employees/repositories/employees-prisma.repository';
 import { SchedulesPrismaRepository } from '../../modules/schedules/repositories/schedules-prisma.repository';

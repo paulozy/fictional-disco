@@ -1,6 +1,6 @@
 import { Router } from 'express';
+import { authMiddleware } from '../../infra/http/middlewares/auth.middleware';
 import { ControllersFactory } from '../../shared/factories/controllers.factory';
-import { authMiddleware } from '../../shared/http/auth.middleware';
 
 const shiftsRouter = Router();
 

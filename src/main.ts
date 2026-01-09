@@ -1,11 +1,6 @@
 import express from 'express';
-import { Database } from './database/database';
-import { authRouter } from './modules/auth/routes';
-import { companiesRouter } from './modules/companies/routes';
-import { employeesRouter } from './modules/employees/routes';
-import { schedulesRouter } from './modules/schedules/routes';
-import { shiftsRouter } from './modules/shifts/routes';
-import { usersRouter } from './modules/users/routes';
+import { Database } from './infra/database/database';
+import { setupRoutes } from './infra/http/routes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,13 +12,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date() });
 });
 
-// Routes
-app.use('/companies', companiesRouter);
-app.use('/users', usersRouter);
-app.use('/auth', authRouter);
-app.use('/employees', employeesRouter);
-app.use('/schedules', schedulesRouter);
-app.use('/shifts', shiftsRouter);
+// Setup routes
+setupRoutes(app);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err);

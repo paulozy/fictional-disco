@@ -1,0 +1,488 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Fictional Disco API",
+    "description": "API de Gerenciamento de Escalas - Sistema de Recursos Humanos",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Suporte API"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor Local"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT token obtido através do endpoint /auth/login"
+      }
+    },
+    "schemas": {
+      "Company": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "segment": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "email": { "type": "string", "format": "email" },
+          "role": { "type": "string", "enum": ["ADMIN", "MANAGER", "EMPLOYEE"] },
+          "companyId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Employee": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "role": { "type": "string" },
+          "phone": { "type": "string" },
+          "active": { "type": "boolean" },
+          "workStartTime": { "type": "string", "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$" },
+          "workEndTime": { "type": "string", "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$" },
+          "workDays": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 6 } },
+          "companyId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Schedule": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "weekStart": { "type": "string", "format": "date-time" },
+          "companyId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Shift": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "dayOfWeek": { "type": "integer", "minimum": 0, "maximum": 6 },
+          "startTime": { "type": "string", "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$" },
+          "endTime": { "type": "string", "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$" },
+          "scheduleId": { "type": "string", "format": "uuid" },
+          "employeeId": { "type": "string", "format": "uuid" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "tags": ["System"],
+        "responses": {
+          "200": {
+            "description": "Server is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": { "type": "string" },
+                    "timestamp": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/companies": {
+      "post": {
+        "summary": "Criar Empresa",
+        "tags": ["Companies"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "segment": { "type": "string" }
+                },
+                "required": ["name", "segment"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Empresa criada com sucesso",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Company" } } }
+          },
+          "400": { "description": "Validação falhou" }
+        }
+      }
+    },
+    "/companies/me": {
+      "get": {
+        "summary": "Obter Minha Empresa",
+        "tags": ["Companies"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dados da empresa",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Company" } } }
+          },
+          "401": { "description": "Token inválido" },
+          "404": { "description": "Empresa não encontrada" }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "summary": "Criar Usuário",
+        "tags": ["Users"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string", "minLength": 8 },
+                  "role": { "type": "string", "enum": ["ADMIN", "MANAGER", "EMPLOYEE"] },
+                  "companyId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["email", "password", "role", "companyId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado com sucesso",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+          },
+          "400": { "description": "Validação falhou" }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "Obter Meus Dados",
+        "tags": ["Users"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Dados do usuário",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+          },
+          "401": { "description": "Token inválido" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Autenticar Usuário",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                },
+                "required": ["email", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticação bem-sucedida",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "email": { "type": "string" },
+                    "role": { "type": "string" },
+                    "companyId": { "type": "string", "format": "uuid" },
+                    "token": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/employees": {
+      "post": {
+        "summary": "Criar Funcionário",
+        "tags": ["Employees"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "role": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "workStartTime": { "type": "string" },
+                  "workEndTime": { "type": "string" },
+                  "workDays": { "type": "array", "items": { "type": "integer" } },
+                  "companyId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["name", "role", "phone", "workStartTime", "workEndTime", "workDays", "companyId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Funcionário criado com sucesso",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Employee" } } }
+          },
+          "400": { "description": "Validação falhou" },
+          "401": { "description": "Token inválido" }
+        }
+      },
+      "get": {
+        "summary": "Listar Funcionários",
+        "tags": ["Employees"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de funcionários",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "employees": { "type": "array", "items": { "$ref": "#/components/schemas/Employee" } }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Token inválido" }
+        }
+      }
+    },
+    "/employees/{employeeId}": {
+      "put": {
+        "summary": "Atualizar Funcionário",
+        "tags": ["Employees"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "employeeId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "role": { "type": "string" },
+                  "phone": { "type": "string" },
+                  "workStartTime": { "type": "string" },
+                  "workEndTime": { "type": "string" },
+                  "workDays": { "type": "array", "items": { "type": "integer" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Funcionário atualizado com sucesso",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Employee" } } }
+          },
+          "401": { "description": "Token inválido" },
+          "404": { "description": "Funcionário não encontrado" }
+        }
+      }
+    },
+    "/employees/{employeeId}/deactivate": {
+      "patch": {
+        "summary": "Desativar Funcionário",
+        "tags": ["Employees"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "employeeId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Funcionário desativado com sucesso",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Employee" } } }
+          },
+          "401": { "description": "Token inválido" },
+          "404": { "description": "Funcionário não encontrado" }
+        }
+      }
+    },
+    "/schedules": {
+      "post": {
+        "summary": "Criar Escala",
+        "tags": ["Schedules"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "weekStart": { "type": "string", "format": "date" },
+                  "companyId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["weekStart", "companyId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Escala criada com sucesso",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Schedule" } } }
+          },
+          "401": { "description": "Token inválido" }
+        }
+      }
+    },
+    "/schedules/{weekStart}": {
+      "get": {
+        "summary": "Obter Escala por Semana",
+        "tags": ["Schedules"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "weekStart", "in": "path", "required": true, "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dados da escala",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Schedule" } } }
+          },
+          "401": { "description": "Token inválido" },
+          "404": { "description": "Escala não encontrada" }
+        }
+      }
+    },
+    "/schedules/{scheduleId}/auto-generate": {
+      "post": {
+        "summary": "Auto-Gerar Turnos na Escala",
+        "tags": ["Schedules"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "scheduleId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "employeeIds": { "type": "array", "items": { "type": "string", "format": "uuid" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Turnos gerados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scheduleId": { "type": "string", "format": "uuid" },
+                    "generatedShifts": { "type": "integer" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Token inválido" },
+          "404": { "description": "Escala ou funcionários não encontrados" }
+        }
+      }
+    },
+    "/shifts": {
+      "post": {
+        "summary": "Criar Turno",
+        "tags": ["Shifts"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dayOfWeek": { "type": "integer", "minimum": 0, "maximum": 6 },
+                  "startTime": { "type": "string" },
+                  "endTime": { "type": "string" },
+                  "scheduleId": { "type": "string", "format": "uuid" },
+                  "employeeId": { "type": "string", "format": "uuid" }
+                },
+                "required": ["dayOfWeek", "startTime", "endTime", "scheduleId", "employeeId"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Turno criado com sucesso",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Shift" } } }
+          },
+          "401": { "description": "Token inválido" }
+        }
+      }
+    },
+    "/shifts/{shiftId}": {
+      "delete": {
+        "summary": "Deletar Turno",
+        "tags": ["Shifts"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "shiftId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }
+        ],
+        "responses": {
+          "204": { "description": "Turno deletado com sucesso" },
+          "401": { "description": "Token inválido" },
+          "404": { "description": "Turno não encontrado" }
+        }
+      }
+    }
+  }
+}

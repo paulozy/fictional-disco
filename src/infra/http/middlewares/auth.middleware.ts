@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
-import { JwtTokenGenerator } from '../../shared/cryptography/jwt-token-generator';
-import { TokenPayload } from '../../shared/cryptography/token-generator.interface';
+import { JwtTokenGenerator } from '../../../shared/cryptography/jwt-token-generator';
+import { TokenPayload } from '../../../shared/cryptography/token-generator.interface';
+
 
 const jwtTokenGenerator = new JwtTokenGenerator(process.env.JWT_SECRET || 'your-secret-key');
 
