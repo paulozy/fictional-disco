@@ -1,16 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { JwtTokenGenerator } from '../../../shared/cryptography/jwt-token-generator';
-import { TokenPayload } from '../../../shared/cryptography/token-generator.interface';
 
-
-const jwtTokenGenerator = new JwtTokenGenerator(process.env.JWT_SECRET || 'your-secret-key');
-
-export interface AuthRequest extends Request {
-  user?: TokenPayload;
-}
+const jwtTokenGenerator = new JwtTokenGenerator();
 
 export async function authMiddleware(
-  req: AuthRequest,
+  req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
@@ -36,7 +30,6 @@ export async function authMiddleware(
 
     const payload = await jwtTokenGenerator.verify(token);
     req.user = payload;
-    console.log("🚀 ~ authMiddleware ~ payload:", payload)
 
     next();
   } catch (error) {

@@ -8,7 +8,7 @@ export class GetMyCompanyController extends Controller {
 
   async handle(request: HttpRequest): Promise<HttpResponse> {
     try {
-      const { companyId } = request.user;
+      const { companyId } = request.user!;
 
       if (!companyId) {
         return this.unauthorized('Company ID not provided');

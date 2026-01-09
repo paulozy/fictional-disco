@@ -5,6 +5,7 @@ import { RepositoriesFactory } from './repositories.factory';
 // Companies
 import { CreateCompanyUseCase } from '../../modules/companies/usecases/create-company.usecase';
 import { GetMyCompanyUseCase } from '../../modules/companies/usecases/get-my-company.usecase';
+import { RegisterCompanyUseCase } from '../../modules/companies/usecases/register-company.usecase';
 
 // Users
 import { CreateUserUseCase } from '../../modules/users/usecases/create-user.usecase';
@@ -29,7 +30,7 @@ import { DeleteShiftUseCase } from '../../modules/shifts/usecases/delete-shift.u
 import { AuthenticateUserUseCase } from '../../modules/auth/usecases/authenticate-user.usecase';
 
 const bcryptEncrypter = new BcryptEncrypter();
-const jwtTokenGenerator = new JwtTokenGenerator(process.env.JWT_SECRET || 'your-secret-key');
+const jwtTokenGenerator = new JwtTokenGenerator();
 
 export class UseCasesFactory {
   // Companies
@@ -39,6 +40,15 @@ export class UseCasesFactory {
 
   static getMyCompanyUseCase(): GetMyCompanyUseCase {
     return new GetMyCompanyUseCase(RepositoriesFactory.getCompaniesRepository());
+  }
+
+  static registerCompanyUseCase(): RegisterCompanyUseCase {
+    return new RegisterCompanyUseCase(
+      RepositoriesFactory.getCompaniesRepository(),
+      RepositoriesFactory.getUsersRepository(),
+      bcryptEncrypter,
+      jwtTokenGenerator,
+    );
   }
 
   // Users

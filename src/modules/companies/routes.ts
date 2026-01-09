@@ -4,6 +4,12 @@ import { ControllersFactory } from '../../shared/factories/controllers.factory';
 
 const companiesRouter = Router();
 
+companiesRouter.post('/register', async (req, res) => {
+  const controller = ControllersFactory.registerCompanyController();
+  const httpResponse = await controller.handle(req);
+  res.status(httpResponse.statusCode).json(httpResponse.body);
+});
+
 companiesRouter.post('/', async (req, res) => {
   const controller = ControllersFactory.createCompanyController();
   const httpResponse = await controller.handle(req);

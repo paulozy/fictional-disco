@@ -3,6 +3,7 @@ import { UseCasesFactory } from './usecases.factory';
 // Companies
 import { CreateCompanyController } from '../../modules/companies/controllers/create-company.controller';
 import { GetMyCompanyController } from '../../modules/companies/controllers/get-my-company.controller';
+import { RegisterCompanyController } from '../../modules/companies/controllers/register-company.controller';
 
 // Users
 import { CreateUserController } from '../../modules/users/controllers/create-user.controller';
@@ -34,6 +35,10 @@ export class ControllersFactory {
 
   static getMyCompanyController(): GetMyCompanyController {
     return new GetMyCompanyController(UseCasesFactory.getMyCompanyUseCase());
+  }
+
+  static registerCompanyController(): RegisterCompanyController {
+    return new RegisterCompanyController(UseCasesFactory.registerCompanyUseCase());
   }
 
   // Users
