@@ -1,9 +1,6 @@
-export interface HttpRequest {
-  body?: any;
-  params?: any;
-  query?: any;
-  headers?: any;
-}
+import { Request } from 'express';
+
+export type HttpRequest = Request;
 
 export interface HttpResponse<T = any> {
   statusCode: number;

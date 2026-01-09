@@ -1,6 +1,11 @@
 import express from 'express';
 import { Database } from './database/database';
-import { setupRoutes } from './routes';
+import { authRouter } from './modules/auth/routes';
+import { companiesRouter } from './modules/companies/routes';
+import { employeesRouter } from './modules/employees/routes';
+import { schedulesRouter } from './modules/schedules/routes';
+import { shiftsRouter } from './modules/shifts/routes';
+import { usersRouter } from './modules/users/routes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +17,13 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date() });
 });
 
-setupRoutes(app);
+// Routes
+app.use('/companies', companiesRouter);
+app.use('/users', usersRouter);
+app.use('/auth', authRouter);
+app.use('/employees', employeesRouter);
+app.use('/schedules', schedulesRouter);
+app.use('/shifts', shiftsRouter);
 
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err);

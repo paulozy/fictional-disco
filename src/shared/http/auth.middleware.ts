@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { JwtTokenGenerator } from '../../shared/cryptography/jwt-token-generator';
 import { TokenPayload } from '../../shared/cryptography/token-generator.interface';
 
