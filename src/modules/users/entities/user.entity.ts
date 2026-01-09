@@ -1,4 +1,4 @@
-import { BaseEntity, BaseEntityProps } from '../../shared/entities/base-entity.entity';
+import { BaseEntity, BaseEntityProps } from '../../../shared/entities/base-entity.entity';
 
 export type UserRole = 'admin' | 'manager';
 
@@ -16,11 +16,11 @@ export class User extends BaseEntity {
   companyId: string;
 
   private constructor(
-    id: string,
     email: string,
     password: string,
     role: UserRole,
     companyId: string,
+    id?: string,
     createdAt: Date = new Date()
   ) {
     super(id, createdAt);
@@ -32,11 +32,11 @@ export class User extends BaseEntity {
 
   static create(props: UserProps): User {
     return new User(
-      props.id,
       props.email,
       props.password,
       props.role,
       props.companyId,
+      props.id,
       props.createdAt
     );
   }
