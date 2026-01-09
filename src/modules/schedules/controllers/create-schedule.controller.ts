@@ -1,5 +1,5 @@
 import { Controller, HttpRequest, HttpResponse } from '../../../shared/http/controller';
-import { CreateScheduleUseCase } from './create-schedule.usecase';
+import { CreateScheduleUseCase } from '../usecases/create-schedule.usecase';
 
 export class CreateScheduleController extends Controller {
   constructor(private createScheduleUseCase: CreateScheduleUseCase) {
@@ -8,10 +8,11 @@ export class CreateScheduleController extends Controller {
 
   async handle(request: HttpRequest): Promise<HttpResponse> {
     try {
-      const { weekStart, companyId } = request.body;
+      const { weekStart } = request.body;
+      const { companyId } = request.user!;
 
-      if (!weekStart || !companyId) {
-        return this.badRequest('Week start date and company ID are required');
+      if (!weekStart) {
+        return this.badRequest('Week start date is required');
       }
 
       const result = await this.createScheduleUseCase.execute({

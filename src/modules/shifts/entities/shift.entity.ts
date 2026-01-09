@@ -1,11 +1,18 @@
 import { BaseEntity, BaseEntityProps } from '../../../shared/entities/base-entity.entity';
 
+export interface EmployeeInfo {
+  id: string;
+  name: string;
+  role: string;
+}
+
 export interface ShiftProps extends BaseEntityProps {
   dayOfWeek: number; // 0-6 (Sunday to Saturday)
   startTime: string; // HH:mm format
   endTime: string;   // HH:mm format
   scheduleId: string;
   employeeId: string;
+  employee?: EmployeeInfo;
 }
 
 export class Shift extends BaseEntity {
@@ -14,6 +21,7 @@ export class Shift extends BaseEntity {
   endTime: string;   // HH:mm format
   scheduleId: string;
   employeeId: string;
+  employee?: EmployeeInfo;
 
   private constructor(
     dayOfWeek: number,
@@ -22,7 +30,8 @@ export class Shift extends BaseEntity {
     scheduleId: string,
     employeeId: string,
     id?: string,
-    createdAt: Date = new Date()
+    createdAt: Date = new Date(),
+    employee?: EmployeeInfo
   ) {
     super(id, createdAt);
     this.dayOfWeek = dayOfWeek;
@@ -30,6 +39,7 @@ export class Shift extends BaseEntity {
     this.endTime = endTime;
     this.scheduleId = scheduleId;
     this.employeeId = employeeId;
+    this.employee = employee;
   }
 
   static create(props: ShiftProps): Shift {
@@ -40,7 +50,8 @@ export class Shift extends BaseEntity {
       props.scheduleId,
       props.employeeId,
       props.id,
-      props.createdAt
+      props.createdAt,
+      props.employee
     );
   }
 }

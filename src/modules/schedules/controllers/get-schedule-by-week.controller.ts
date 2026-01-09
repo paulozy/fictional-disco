@@ -1,5 +1,5 @@
 import { Controller, HttpRequest, HttpResponse } from '../../../shared/http/controller';
-import { GetScheduleByWeekUseCase } from './get-schedule-by-week.usecase';
+import { GetScheduleByWeekUseCase } from '../usecases/get-schedule-by-week.usecase';
 
 export class GetScheduleByWeekController extends Controller {
   constructor(private getScheduleByWeekUseCase: GetScheduleByWeekUseCase) {
@@ -8,11 +8,11 @@ export class GetScheduleByWeekController extends Controller {
 
   async handle(request: HttpRequest): Promise<HttpResponse> {
     try {
-      const weekStart = request.query?.weekStart;
-      const companyId = request.query?.companyId;
+      const { weekStart } = request.params;
+      const { companyId } = request.user!;
 
-      if (!weekStart || !companyId) {
-        return this.badRequest('Week start date and company ID are required');
+      if (!weekStart) {
+        return this.badRequest('Week start date is required');
       }
 
       const result = await this.getScheduleByWeekUseCase.execute({

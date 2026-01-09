@@ -8,9 +8,10 @@ export class CreateEmployeeController extends Controller {
 
   async handle(request: HttpRequest): Promise<HttpResponse> {
     try {
-      const { name, role, phone, workStartTime, workEndTime, workDays, companyId } = request.body;
+      const { name, role, phone, workStartTime, workEndTime, workDays } = request.body;
+      const { companyId } = request.user!;
 
-      if (!name || !role || !phone || !workStartTime || !workEndTime || !workDays || !companyId) {
+      if (!name || !role || !phone || !workStartTime || !workEndTime || !workDays) {
         return this.badRequest(
           'Name, role, phone, workStartTime, workEndTime, workDays, and companyId are required'
         );

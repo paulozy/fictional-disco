@@ -401,22 +401,37 @@ GET /schedules/:weekStart
 ```
 **Autenticação:** ✅ Requerida
 
+**Descrição:** Obtém a escala de uma semana com todos os turnos e funcionários. Se a escala não existir, é criada automaticamente.
+
 **Path Parameters:**
 - `weekStart` (string, required) - Data de início da semana (YYYY-MM-DD)
 
 **Response (200 OK):**
 ```json
 {
-  "id": "uuid",
-  "weekStart": "2026-01-13T00:00:00.000Z",
-  "companyId": "uuid_da_empresa",
-  "createdAt": "2026-01-09T02:00:00.000Z"
+  "schedule": {
+    "id": "uuid",
+    "weekStart": "2026-01-13T00:00:00.000Z",
+    "weekEnd": "2026-01-19T00:00:00.000Z"
+  },
+  "shifts": [
+    {
+      "id": "uuid",
+      "dayOfWeek": 1,
+      "startTime": "09:00",
+      "endTime": "17:00",
+      "employee": {
+        "id": "uuid",
+        "name": "João Silva",
+        "role": "Garçom"
+      }
+    }
+  ]
 }
 ```
 
 **Erros:**
 - `401` - Token inválido
-- `404` - Escala não encontrada
 - `500` - Erro interno do servidor
 
 ---

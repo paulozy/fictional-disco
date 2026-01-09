@@ -11,10 +11,6 @@ export class UpdateEmployeeController extends Controller {
       const employeeId = request.params?.employeeId;
       const { name, role, phone, workStartTime, workEndTime, workDays } = request.body;
 
-      if (!employeeId) {
-        return this.badRequest('Employee ID is required');
-      }
-
       const result = await this.updateEmployeeUseCase.execute({
         employeeId,
         name,

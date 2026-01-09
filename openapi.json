@@ -67,6 +67,39 @@
           "createdAt": { "type": "string", "format": "date-time" }
         }
       },
+      "ScheduleWithShifts": {
+        "type": "object",
+        "properties": {
+          "schedule": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string", "format": "uuid" },
+              "weekStart": { "type": "string", "format": "date-time" },
+              "weekEnd": { "type": "string", "format": "date-time" }
+            }
+          },
+          "shifts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "format": "uuid" },
+                "dayOfWeek": { "type": "integer", "minimum": 0, "maximum": 6 },
+                "startTime": { "type": "string", "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$" },
+                "endTime": { "type": "string", "pattern": "^([0-1][0-9]|2[0-3]):[0-5][0-9]$" },
+                "employee": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "name": { "type": "string" },
+                    "role": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "Shift": {
         "type": "object",
         "properties": {
@@ -430,11 +463,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Dados da escala",
-            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Schedule" } } }
+            "description": "Dados da escala com turnos e funcionários",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ScheduleWithShifts" } } }
           },
-          "401": { "description": "Token inválido" },
-          "404": { "description": "Escala não encontrada" }
+          "401": { "description": "Token inválido" }
         }
       }
     },

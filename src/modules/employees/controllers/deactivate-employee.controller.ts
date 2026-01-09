@@ -1,5 +1,5 @@
 import { Controller, HttpRequest, HttpResponse } from '../../../shared/http/controller';
-import { DeactivateEmployeeUseCase } from './deactivate-employee.usecase';
+import { DeactivateEmployeeUseCase } from '../usecases/deactivate-employee.usecase';
 
 export class DeactivateEmployeeController extends Controller {
   constructor(private deactivateEmployeeUseCase: DeactivateEmployeeUseCase) {

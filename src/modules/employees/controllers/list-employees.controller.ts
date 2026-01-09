@@ -8,11 +8,7 @@ export class ListEmployeesController extends Controller {
 
   async handle(request: HttpRequest): Promise<HttpResponse> {
     try {
-      const companyId = request.params?.companyId;
-
-      if (!companyId) {
-        return this.badRequest('Company ID is required');
-      }
+      const { companyId } = request.user!;
 
       const result = await this.listEmployeesUseCase.execute({ companyId });
 

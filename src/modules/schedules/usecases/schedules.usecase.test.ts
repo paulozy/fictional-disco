@@ -29,7 +29,7 @@ describe('Schedules Usecases', () => {
   });
 
   describe('GetScheduleByWeekUseCase', () => {
-    it('should return schedule by week start date', async () => {
+    it('should return existing schedule by week start date', async () => {
       const weekStart = new Date('2026-01-12');
 
       const created = await createScheduleUseCase.execute({
@@ -42,19 +42,29 @@ describe('Schedules Usecases', () => {
         companyId: 'company-1',
       });
 
-      expect(response.id).toBe(created.id);
-      expect(response.weekStart).toEqual(weekStart);
+      expect(response.schedule.id).toBe(created.id);
+      expect(response.schedule.weekStart).toEqual(weekStart);
+      expect(response.shifts).toBeInstanceOf(Array);
     });
 
-    it('should throw error when schedule not found', async () => {
+    it('should create and return schedule if it does not exist', async () => {
       const weekStart = new Date('2026-01-12');
 
-      await expect(
-        getScheduleByWeekUseCase.execute({
-          weekStart,
-          companyId: 'company-1',
-        }),
-      ).rejects.toThrow('Schedule not found');
+      const response = await getScheduleByWeekUseCase.execute({
+        weekStart,
+        companyId: 'company-1',
+      });
+
+      expect(response).toHaveProperty('schedule');
+      expect(response).toHaveProperty('shifts');
+      expect(response.schedule).toHaveProperty('id');
+      expect(response.schedule.weekStart).toEqual(weekStart);
+      expect(response.shifts).toBeInstanceOf(Array);
+
+      // Verify it was actually created in repository
+      const retrieved = await schedulesRepository.findByWeekStart(weekStart, 'company-1');
+      expect(retrieved).not.toBeNull();
+      expect(retrieved?.id).toBe(response.schedule.id);
     });
   });
 });

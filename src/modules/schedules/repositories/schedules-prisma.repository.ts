@@ -47,6 +47,13 @@ export class SchedulesPrismaRepository
         },
         companyId,
       },
+      include: {
+        shifts: {
+          include: {
+            employee: true,
+          },
+        },
+      },
     });
 
     return schedule ? this.toDomain(schedule) : null;
@@ -70,11 +77,26 @@ export class SchedulesPrismaRepository
   }
 
   protected toDomain(raw: any): Schedule {
+    const shifts = raw.shifts
+      ? raw.shifts.map((shift: any) => ({
+        id: shift.id,
+        dayOfWeek: shift.dayOfWeek,
+        startTime: shift.startTime,
+        endTime: shift.endTime,
+        scheduleId: shift.scheduleId,
+        employeeId: shift.employeeId,
+        createdAt: shift.createdAt,
+        updatedAt: shift.updatedAt,
+        employee: shift.employee,
+      }))
+      : [];
+
     return Schedule.create({
       id: raw.id,
       weekStart: raw.weekStart,
       companyId: raw.companyId,
       createdAt: raw.createdAt,
+      shifts: shifts as any,
     });
   }
 
