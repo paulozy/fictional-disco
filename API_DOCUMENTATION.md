@@ -21,7 +21,50 @@ O token é válido por **24 horas**.
 
 ### 🏢 COMPANIES
 
-#### 1. Criar Empresa
+#### 1. Registrar Nova Empresa com Admin
+```
+POST /companies/register
+```
+**Autenticação:** ❌ Não requerida
+
+**Descrição:** Cria uma nova empresa junto com um usuário administrador e retorna um JWT token para autenticação imediata.
+
+**Request Body:**
+```json
+{
+  "companyName": "Tech Solutions",
+  "segment": "Technology",
+  "adminEmail": "admin@techsolutions.com",
+  "adminPassword": "senha_segura_123"
+}
+```
+
+**Response (201 Created):**
+```json
+{
+  "company": {
+    "id": "uuid",
+    "name": "Tech Solutions",
+    "segment": "Technology",
+    "createdAt": "2026-01-09T02:00:00.000Z"
+  },
+  "user": {
+    "id": "uuid",
+    "email": "admin@techsolutions.com",
+    "role": "admin",
+    "companyId": "uuid"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Erros:**
+- `400` - Campo obrigatório ausente ou email já existe
+- `500` - Erro interno do servidor
+
+---
+
+#### 2. Criar Empresa
 ```
 POST /companies
 ```
@@ -51,7 +94,7 @@ POST /companies
 
 ---
 
-#### 2. Obter Minha Empresa
+#### 3. Obter Minha Empresa
 ```
 GET /companies/me
 ```

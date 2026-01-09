@@ -110,6 +110,49 @@
         }
       }
     },
+    "/companies/register": {
+      "post": {
+        "summary": "Registrar Nova Empresa com Admin",
+        "tags": ["Companies"],
+        "description": "Cria uma nova empresa junto com um usuário administrador e retorna um JWT token",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "companyName": { "type": "string" },
+                  "segment": { "type": "string" },
+                  "adminEmail": { "type": "string", "format": "email" },
+                  "adminPassword": { "type": "string", "minLength": 8 }
+                },
+                "required": ["companyName", "segment", "adminEmail", "adminPassword"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Empresa e usuário criados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "company": { "$ref": "#/components/schemas/Company" },
+                    "user": { "$ref": "#/components/schemas/User" },
+                    "token": { "type": "string", "description": "JWT Token para autenticação" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Validação falhou ou email já existe" },
+          "500": { "description": "Erro interno do servidor" }
+        }
+      }
+    },
     "/companies": {
       "post": {
         "summary": "Criar Empresa",
