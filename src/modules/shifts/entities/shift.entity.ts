@@ -16,12 +16,12 @@ export class Shift extends BaseEntity {
   employeeId: string;
 
   private constructor(
-    id: string,
     dayOfWeek: number,
     startTime: string,
     endTime: string,
     scheduleId: string,
     employeeId: string,
+    id?: string,
     createdAt: Date = new Date()
   ) {
     super(id, createdAt);
@@ -34,12 +34,12 @@ export class Shift extends BaseEntity {
 
   static create(props: ShiftProps): Shift {
     return new Shift(
-      props.id,
       props.dayOfWeek,
       props.startTime,
       props.endTime,
       props.scheduleId,
       props.employeeId,
+      props.id,
       props.createdAt
     );
   }
