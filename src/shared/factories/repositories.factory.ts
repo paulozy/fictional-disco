@@ -1,44 +1,32 @@
-import { PrismaClient } from '@prisma/client';
-import { CompaniesPrismaRepository } from '../modules/companies/repositories/companies-prisma.repository';
-import { EmployeesPrismaRepository } from '../modules/employees/repositories/employees-prisma.repository';
-import { SchedulesPrismaRepository } from '../modules/schedules/repositories/schedules-prisma.repository';
-import { ShiftsPrismaRepository } from '../modules/shifts/repositories/shifts-prisma.repository';
-import { UsersPrismaRepository } from '../modules/users/repositories/users-prisma.repository';
+import { Database } from '../../database/database';
+import { CompaniesPrismaRepository } from '../../modules/companies/repositories/companies-prisma.repository';
+import { EmployeesPrismaRepository } from '../../modules/employees/repositories/employees-prisma.repository';
+import { SchedulesPrismaRepository } from '../../modules/schedules/repositories/schedules-prisma.repository';
+import { ShiftsPrismaRepository } from '../../modules/shifts/repositories/shifts-prisma.repository';
+import { UsersPrismaRepository } from '../../modules/users/repositories/users-prisma.repository';
 
 export class RepositoriesFactory {
-  private static prisma: PrismaClient | null = null;
-
-  static getPrismaClient(): PrismaClient {
-    if (!this.prisma) {
-      this.prisma = new PrismaClient();
-    }
-    return this.prisma;
-  }
-
   static getCompaniesRepository() {
-    return new CompaniesPrismaRepository(this.getPrismaClient());
+    return new CompaniesPrismaRepository(Database.getInstance());
   }
 
   static getUsersRepository() {
-    return new UsersPrismaRepository(this.getPrismaClient());
+    return new UsersPrismaRepository(Database.getInstance());
   }
 
   static getEmployeesRepository() {
-    return new EmployeesPrismaRepository(this.getPrismaClient());
+    return new EmployeesPrismaRepository(Database.getInstance());
   }
 
   static getSchedulesRepository() {
-    return new SchedulesPrismaRepository(this.getPrismaClient());
+    return new SchedulesPrismaRepository(Database.getInstance());
   }
 
   static getShiftsRepository() {
-    return new ShiftsPrismaRepository(this.getPrismaClient());
+    return new ShiftsPrismaRepository(Database.getInstance());
   }
 
   static async disconnect(): Promise<void> {
-    if (this.prisma) {
-      await this.prisma.$disconnect();
-      this.prisma = null;
-    }
+    await Database.disconnect();
   }
 }
