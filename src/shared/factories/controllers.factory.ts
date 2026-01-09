@@ -10,14 +10,14 @@ import { GetMeController } from '../../modules/users/controllers/get-me.controll
 
 // Employees
 import { CreateEmployeeController } from '../../modules/employees/controllers/create-employee.controller';
+import { DeactivateEmployeeController } from '../../modules/employees/controllers/deactivate-employee.controller';
 import { ListEmployeesController } from '../../modules/employees/controllers/list-employees.controller';
 import { UpdateEmployeeController } from '../../modules/employees/controllers/update-employee.controller';
-import { DeactivateEmployeeController } from '../../modules/employees/controllers/deactivate-employee.controller';
 
 // Schedules
+import { AutoGenerateScheduleController } from '../../modules/schedules/controllers/auto-generate-schedule.controller';
 import { CreateScheduleController } from '../../modules/schedules/controllers/create-schedule.controller';
 import { GetScheduleByWeekController } from '../../modules/schedules/controllers/get-schedule-by-week.controller';
-import { AutoGenerateScheduleController } from '../../modules/schedules/controllers/auto-generate-schedule.controller';
 
 // Shifts
 import { CreateShiftController } from '../../modules/shifts/controllers/create-shift.controller';

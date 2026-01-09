@@ -1,6 +1,6 @@
-import { RepositoriesFactory } from './repositories.factory';
 import { BcryptEncrypter } from '../cryptography/bcrypt-encrypter';
 import { JwtTokenGenerator } from '../cryptography/jwt-token-generator';
+import { RepositoriesFactory } from './repositories.factory';
 
 // Companies
 import { CreateCompanyUseCase } from '../../modules/companies/usecases/create-company.usecase';
@@ -12,14 +12,14 @@ import { GetMeUseCase } from '../../modules/users/usecases/get-me.usecase';
 
 // Employees
 import { CreateEmployeeUseCase } from '../../modules/employees/usecases/create-employee.usecase';
+import { DeactivateEmployeeUseCase } from '../../modules/employees/usecases/deactivate-employee.usecase';
 import { ListEmployeesUseCase } from '../../modules/employees/usecases/list-employees.usecase';
 import { UpdateEmployeeUseCase } from '../../modules/employees/usecases/update-employee.usecase';
-import { DeactivateEmployeeUseCase } from '../../modules/employees/usecases/deactivate-employee.usecase';
 
 // Schedules
+import { AutoGenerateScheduleUseCase } from '../../modules/schedules/usecases/auto-generate-schedule.usecase';
 import { CreateScheduleUseCase } from '../../modules/schedules/usecases/create-schedule.usecase';
 import { GetScheduleByWeekUseCase } from '../../modules/schedules/usecases/get-schedule-by-week.usecase';
-import { AutoGenerateScheduleUseCase } from '../../modules/schedules/usecases/auto-generate-schedule.usecase';
 
 // Shifts
 import { CreateShiftUseCase } from '../../modules/shifts/usecases/create-shift.usecase';
@@ -57,28 +57,24 @@ export class UseCasesFactory {
   static createEmployeeUseCase(): CreateEmployeeUseCase {
     return new CreateEmployeeUseCase(
       RepositoriesFactory.getEmployeesRepository(),
-      RepositoriesFactory.getCompaniesRepository(),
     );
   }
 
   static listEmployeesUseCase(): ListEmployeesUseCase {
     return new ListEmployeesUseCase(
       RepositoriesFactory.getEmployeesRepository(),
-      RepositoriesFactory.getCompaniesRepository(),
     );
   }
 
   static updateEmployeeUseCase(): UpdateEmployeeUseCase {
     return new UpdateEmployeeUseCase(
       RepositoriesFactory.getEmployeesRepository(),
-      RepositoriesFactory.getCompaniesRepository(),
     );
   }
 
   static deactivateEmployeeUseCase(): DeactivateEmployeeUseCase {
     return new DeactivateEmployeeUseCase(
       RepositoriesFactory.getEmployeesRepository(),
-      RepositoriesFactory.getCompaniesRepository(),
     );
   }
 
@@ -86,22 +82,20 @@ export class UseCasesFactory {
   static createScheduleUseCase(): CreateScheduleUseCase {
     return new CreateScheduleUseCase(
       RepositoriesFactory.getSchedulesRepository(),
-      RepositoriesFactory.getCompaniesRepository(),
     );
   }
 
   static getScheduleByWeekUseCase(): GetScheduleByWeekUseCase {
     return new GetScheduleByWeekUseCase(
       RepositoriesFactory.getSchedulesRepository(),
-      RepositoriesFactory.getCompaniesRepository(),
     );
   }
 
   static autoGenerateScheduleUseCase(): AutoGenerateScheduleUseCase {
     return new AutoGenerateScheduleUseCase(
       RepositoriesFactory.getSchedulesRepository(),
-      RepositoriesFactory.getEmployeesRepository(),
       RepositoriesFactory.getShiftsRepository(),
+      RepositoriesFactory.getEmployeesRepository(),
     );
   }
 
@@ -109,8 +103,6 @@ export class UseCasesFactory {
   static createShiftUseCase(): CreateShiftUseCase {
     return new CreateShiftUseCase(
       RepositoriesFactory.getShiftsRepository(),
-      RepositoriesFactory.getSchedulesRepository(),
-      RepositoriesFactory.getEmployeesRepository(),
     );
   }
 
