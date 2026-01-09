@@ -1,7 +1,7 @@
 module.exports = {
   testEnvironment: 'node',
   transform: {
-    '^.+\\.tsx?$': ['@swc/jest', {
+    '^.+\\.tsx?$': [ '@swc/jest', {
       jsc: {
         parser: {
           syntax: 'typescript',
@@ -10,12 +10,12 @@ module.exports = {
         },
         transform: {}
       }
-    }]
+    } ]
   },
-  testMatch: ['**/__tests__/**/*.test.ts', '**/?(*.)+(spec|test).ts'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  testMatch: [ '**/__tests__/**/*.test.ts', '**/?(*.)+(spec|test).ts' ],
+  moduleFileExtensions: [ 'ts', 'tsx', 'js', 'jsx', 'json', 'node' ],
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/**/*.d.ts'
   ]
-};
+}
