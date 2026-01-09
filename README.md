@@ -4,11 +4,12 @@ Sistema de gerenciamento de escalas de turnos com geração automática de sched
 
 ## 🎯 Features Implementadas
 
-### ⭐ Auto-Generate Schedule (Feature Estrela)
-Gera automaticamente a escala de turnos baseado em:
-- Dias de trabalho de cada funcionário (`workDays`)
-- Horários de início e fim (`workStartTime`, `workEndTime`)
-- Suporte para gerar para todos ou funcionários específicos
+### ⭐ Get Schedule by Week (Auto-Create)
+Obtém schedules semanais com auto-criação:
+- Retorna schedule + shifts com employee details
+- Cria automaticamente a schedule se não existir
+- Calcula automaticamente weekEnd (weekStart + 6 dias)
+- Endpoint: `GET /schedules/:weekStart`
 
 ### 📦 Módulos
 - **Companies** - Gerenciar empresas
@@ -32,11 +33,12 @@ Gera automaticamente a escala de turnos baseado em:
 ## 📊 Estatísticas
 
 ```
-✅ 30 testes passando
-✅ 82.8% cobertura de código
+✅ 28 testes passando (7 suites)
 ✅ 14 usecases implementados
-✅ 48 arquivos compilados em 73ms
+✅ 83 arquivos compilados em 83.54ms
 ✅ Zero erros TypeScript
+✅ API HTTP completa (6 módulos)
+✅ CORS habilitado (ngrok ready)
 ```
 
 ## 🚀 Quick Start
@@ -53,16 +55,27 @@ npm install
 docker compose up -d
 ```
 
-### 3. Rodar migrations
+### 3. Configurar .env
+```bash
+cp .env.example .env
+# Editar DATABASE_URL se necessário
+```
+
+### 4. Rodar migrations
 ```bash
 npx prisma migrate dev
 ```
 
-### 4. Desenvolver
+### 5. Desenvolver
 ```bash
-npm run dev      # Watch mode com SWC
+npm run dev      # Watch mode com SWC + Express
 npm test         # Executar testes
 npm run build    # Build para produção
+```
+
+### 6. Publicar com ngrok (opcional)
+```bash
+ngrok http --url=<seu-dominio> 3000
 ```
 
 ## 📁 Estrutura de Pastas
@@ -109,8 +122,9 @@ npm run test:coverage  # Cobertura detalhada
 
 ## 📚 Documentação
 
-- [Docker Setup](./DOCKER.md)
-- [Features](../.github/FEATURES.md)
+- [API Documentation](./API_DOCUMENTATION.md) - Detalhes de todos os endpoints
+- [OpenAPI/Swagger](./openapi.json) - Especificação completa
+- [Prisma Schema](./prisma/schema.prisma) - Modelo de dados
 
 ## 🎓 Padrões Utilizados
 
@@ -120,14 +134,34 @@ npm run test:coverage  # Cobertura detalhada
 - **Factory Method** - Criação de entidades
 - **Use Case Pattern** - Organização de lógica
 
+## 📡 Endpoints Principais
+
+### Auth
+- `POST /auth/login` - Login de usuário
+
+### Companies
+- `POST /companies/register` - Registrar nova empresa + admin user
+- `GET /companies` - Listar empresas
+
+### Employees
+- `GET /employees` - Listar funcionários
+- `POST /employees` - Criar funcionário
+
+### Schedules
+- `GET /schedules/:weekStart` - Get schedule com shifts + employees (auto-cria se não existir)
+
+### Shifts
+- `POST /shifts` - Criar shift
+- `GET /shifts` - Listar shifts
+
 ## 🔄 Próximos Passos
 
-- [ ] Implementar repositories Prisma (substituir in-memory)
-- [ ] Criar API routes (Express/Fastify)
-- [ ] Adicionar autenticação middleware
+- [ ] Implementar filtros e paginação em endpoints
+- [ ] Adicionar validações mais rigorosas
 - [ ] Integração tests com banco real
-- [ ] Documentação Swagger/OpenAPI
+- [ ] Sistema de permissões (RBAC)
 - [ ] CI/CD pipeline
+- [ ] Testes de performance
 
 ## 📄 Licença
 
