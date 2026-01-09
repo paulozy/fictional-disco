@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import { Database } from './infra/database/database';
 import { setupRoutes } from './infra/http/routes';
