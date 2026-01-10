@@ -2,6 +2,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import { Database } from './infra/database/database';
+import { getCorsConfig } from './infra/http/cors.config';
 import { webhookRawBodyMiddleware } from './infra/http/middlewares/webhook-raw-body.middleware';
 import { setupRoutes } from './infra/http/routes';
 
@@ -9,12 +10,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // CORS Configuration
-app.use(cors({
-  origin: '*',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
-}));
+app.use(cors(getCorsConfig()));
 
 app.use(webhookRawBodyMiddleware);
 

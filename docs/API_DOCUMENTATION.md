@@ -4,7 +4,25 @@
 
 ---
 
-## 🔐 Autenticação
+## � CORS Configuration
+
+A API implementa CORS (Cross-Origin Resource Sharing) adaptativo baseado no ambiente:
+
+- **Development** (`NODE_ENV != "production"`): Permite todas as origens
+- **Production** (`NODE_ENV = "production"`): Restringe apenas às origens configuradas
+
+**Variáveis de Ambiente:**
+```bash
+NODE_ENV=production
+FRONTEND_URL=https://myapp.com
+ALLOWED_ORIGINS=https://app.myapp.com,https://staging.myapp.com
+```
+
+Para mais detalhes, veja [CORS_CONFIGURATION.md](./CORS_CONFIGURATION.md)
+
+---
+
+## �🔐 Autenticação
 
 A maioria das rotas requer autenticação via **JWT Token**.
 
