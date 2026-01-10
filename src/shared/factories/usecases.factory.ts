@@ -25,6 +25,7 @@ import { GetScheduleByWeekUseCase } from '../../modules/schedules/usecases/get-s
 
 // Shifts
 import { CreateShiftUseCase } from '../../modules/shifts/usecases/create-shift.usecase';
+import { DeleteAllShiftsFromScheduleUseCase } from '../../modules/shifts/usecases/delete-all-shifts-from-schedule.usecase';
 import { DeleteShiftUseCase } from '../../modules/shifts/usecases/delete-shift.usecase';
 
 // Auth
@@ -125,6 +126,12 @@ export class UseCasesFactory {
 
   static deleteShiftUseCase(): DeleteShiftUseCase {
     return new DeleteShiftUseCase(RepositoriesFactory.getShiftsRepository());
+  }
+
+  static deleteAllShiftsFromScheduleUseCase(): DeleteAllShiftsFromScheduleUseCase {
+    return new DeleteAllShiftsFromScheduleUseCase(
+      RepositoriesFactory.getShiftsRepository(),
+    );
   }
 
   // Auth

@@ -23,6 +23,7 @@ import { GetScheduleByWeekController } from '../../modules/schedules/controllers
 // Shifts
 import { CreateShiftController } from '../../modules/shifts/controllers/create-shift.controller';
 import { DeleteShiftController } from '../../modules/shifts/controllers/delete-shift.controller';
+import { DeleteAllShiftsFromScheduleController } from '../../modules/shifts/controllers/delete-all-shifts-from-schedule.controller';
 
 // Auth
 import { AuthenticateUserController } from '../../modules/auth/controllers/authenticate-user.controller';
@@ -99,6 +100,12 @@ export class ControllersFactory {
 
   static deleteShiftController(): DeleteShiftController {
     return new DeleteShiftController(UseCasesFactory.deleteShiftUseCase());
+  }
+
+  static deleteAllShiftsFromScheduleController(): DeleteAllShiftsFromScheduleController {
+    return new DeleteAllShiftsFromScheduleController(
+      UseCasesFactory.deleteAllShiftsFromScheduleUseCase(),
+    );
   }
 
   // Auth

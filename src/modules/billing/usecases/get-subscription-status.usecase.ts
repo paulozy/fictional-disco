@@ -51,25 +51,13 @@ export class GetSubscriptionStatusUseCase implements UseCase<GetSubscriptionStat
         status: subscription.status,
       });
 
-      if (subscription.plan === PlanType.PRO && subscription.status !== SubscriptionStatus.ACTIVE) {
-        this.logger.warn('Subscription is not active', {
-          subscriptionId: subscription.id,
-          status: subscription.status,
-        });
-        return {
-          id: '',
-          companyId: subscription.companyId,
-          plan: PlanType.FREE,
-          status: SubscriptionStatus.ACTIVE,
-          createdAt: subscription.createdAt,
-        };
-      }
-
       return {
         id: subscription.id,
         companyId: subscription.companyId,
         plan: subscription.plan as PlanType,
         status: subscription.status as SubscriptionStatus,
+        paymentGatewayCustomerId: subscription.paymentGatewayCustomerId,
+        paymentGatewaySubscriptionId: subscription.paymentGatewaySubscriptionId,
         createdAt: subscription.createdAt,
       };
     } catch (error) {

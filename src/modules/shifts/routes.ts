@@ -16,4 +16,10 @@ shiftsRouter.delete('/:shiftId', authMiddleware, async (req, res) => {
   res.status(httpResponse.statusCode).json(httpResponse.body);
 });
 
+shiftsRouter.delete('/schedule/:scheduleId/all', authMiddleware, async (req, res) => {
+  const controller = ControllersFactory.deleteAllShiftsFromScheduleController();
+  const httpResponse = await controller.handle(req);
+  res.status(httpResponse.statusCode).json(httpResponse.body);
+});
+
 export { shiftsRouter };
