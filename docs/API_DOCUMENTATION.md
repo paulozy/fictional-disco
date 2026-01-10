@@ -718,6 +718,42 @@ Se a empresa não tem subscription (plano FREE):
 
 ---
 
+#### 4. Cancelar Subscription
+```
+DELETE /billing/subscription
+```
+**Autenticação:** ✅ Requerida
+
+**Descrição:** Cancela a subscription PRO ativa da empresa autenticada. Após o cancelamento, a empresa volta para o plano FREE. O cancelamento é imediato e irrevogável.
+
+**Response (200 OK):**
+```json
+{
+  "id": "sub-uuid",
+  "companyId": "company-uuid",
+  "status": "CANCELLED",
+  "message": "Subscription cancelled successfully"
+}
+```
+
+**Erros:**
+- `400` - Subscription não encontrada ou já cancelada
+  ```json
+  {
+    "error": "Subscription not found for this company"
+  }
+  ```
+  ou
+  ```json
+  {
+    "error": "Subscription is already cancelled"
+  }
+  ```
+- `401` - Token não fornecido ou inválido
+- `500` - Erro ao cancelar subscription no Stripe
+
+---
+
 ### Planos Disponíveis
 
 #### FREE (Padrão)
