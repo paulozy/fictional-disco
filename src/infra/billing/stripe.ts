@@ -74,6 +74,15 @@ export class StripeBillingClient implements BillingClient {
     };
   }
 
+  async cancelSubscription(subscriptionId: string): Promise<void> {
+    try {
+      await this.stripe.subscriptions.cancel(subscriptionId);
+    } catch (error) {
+      console.error('Error cancelling Stripe subscription:', error);
+      throw error;
+    }
+  }
+
   async handleWebhook<T>(payload: any, sig: string): Promise<T> {
     const event = this.stripe.webhooks.constructEvent(
       payload,

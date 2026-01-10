@@ -1,6 +1,7 @@
 import { FakeBillingClient } from '../../../shared/testing/fake-billing-client';
 import { InMemoryCompaniesRepository } from '../../companies/repositories/in-memory-companies.repository';
 import { InMemorySubscriptionsRepository } from '../repositories/in-memory-subscriptions.repository';
+import { CancelSubscriptionUseCase } from '../usecases/cancel-subscription.usecase';
 import { CreateCheckoutUseCase } from '../usecases/create-checkout.usecase';
 import { GetSubscriptionStatusUseCase } from '../usecases/get-subscription-status.usecase';
 import { HandleWebhookUseCase } from '../usecases/handle-webhook.usecase';
@@ -12,6 +13,7 @@ describe('Billing Usecases', () => {
   let createCheckoutUseCase: CreateCheckoutUseCase;
   let handleWebhookUseCase: HandleWebhookUseCase;
   let getSubscriptionStatusUseCase: GetSubscriptionStatusUseCase;
+  let cancelSubscriptionUseCase: CancelSubscriptionUseCase;
   let testCompanyId: string;
 
   beforeEach(async () => {
@@ -19,7 +21,6 @@ describe('Billing Usecases', () => {
     companiesRepository = new InMemoryCompaniesRepository();
     billingClient = new FakeBillingClient();
 
-    // Create a test company for the CreateCheckoutUseCase tests
     const company = await companiesRepository.create({
       name: 'Test Company',
       segment: 'TECHNOLOGY',
@@ -34,6 +35,7 @@ describe('Billing Usecases', () => {
     );
     handleWebhookUseCase = new HandleWebhookUseCase(subscriptionsRepository);
     getSubscriptionStatusUseCase = new GetSubscriptionStatusUseCase(subscriptionsRepository);
+    cancelSubscriptionUseCase = new CancelSubscriptionUseCase(subscriptionsRepository, billingClient);
   });
 
   describe('CreateCheckoutUseCase', () => {
@@ -131,6 +133,65 @@ describe('Billing Usecases', () => {
       expect(response.plan).toBe('PRO');
       expect(response.status).toBe('INACTIVE'); // New subscriptions are INACTIVE
       expect(response.id).toBe(checkoutResponse.subscriptionId);
+    });
+  });
+
+  describe('CancelSubscriptionUseCase', () => {
+    it('should cancel an active subscription', async () => {
+      // Create a subscription first
+      const checkoutResponse = await createCheckoutUseCase.execute({
+        companyId: testCompanyId,
+        plan: 'PRO',
+      });
+
+      // Activate the subscription
+      const subscription = await subscriptionsRepository.findById(checkoutResponse.subscriptionId);
+      if (subscription) {
+        await subscriptionsRepository.update(subscription.id, {
+          status: 'ACTIVE',
+          paymentGatewaySubscriptionId: 'sub_stripe_123',
+        });
+      }
+
+      // Cancel the subscription
+      const response = await cancelSubscriptionUseCase.execute({
+        companyId: testCompanyId,
+      });
+
+      expect(response.status).toBe('CANCELLED');
+      expect(response.message).toBe('Subscription cancelled successfully');
+
+      // Verify subscription is cancelled
+      const cancelledSubscription = await subscriptionsRepository.findById(checkoutResponse.subscriptionId);
+      expect(cancelledSubscription?.status).toBe('CANCELLED');
+    });
+
+    it('should throw error if subscription not found', async () => {
+      await expect(
+        cancelSubscriptionUseCase.execute({
+          companyId: 'non-existent-company',
+        })
+      ).rejects.toThrow('Subscription not found for this company');
+    });
+
+    it('should throw error if subscription is already cancelled', async () => {
+      // Create a subscription first
+      const checkoutResponse = await createCheckoutUseCase.execute({
+        companyId: testCompanyId,
+        plan: 'PRO',
+      });
+
+      // Cancel the subscription
+      await cancelSubscriptionUseCase.execute({
+        companyId: testCompanyId,
+      });
+
+      // Try to cancel again
+      await expect(
+        cancelSubscriptionUseCase.execute({
+          companyId: testCompanyId,
+        })
+      ).rejects.toThrow('Subscription is already cancelled');
     });
   });
 });

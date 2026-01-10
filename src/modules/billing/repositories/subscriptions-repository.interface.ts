@@ -4,14 +4,14 @@ import { Subscription } from '../entities/subscription.entity';
 export interface CreateSubscriptionProps {
   companyId: string;
   plan: 'FREE' | 'PRO';
-  status: 'ACTIVE' | 'INACTIVE';
+  status: 'ACTIVE' | 'INACTIVE' | 'CANCELLED' | 'PAST_DUE';
   paymentGatewayCustomerId?: string;
   paymentGatewaySubscriptionId?: string;
 }
 
 export interface UpdateSubscriptionProps {
   plan?: 'FREE' | 'PRO';
-  status?: 'ACTIVE' | 'INACTIVE';
+  status?: 'ACTIVE' | 'INACTIVE' | 'CANCELLED' | 'PAST_DUE';
   paymentGatewayCustomerId?: string;
   paymentGatewaySubscriptionId?: string;
 }

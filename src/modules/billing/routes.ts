@@ -23,6 +23,15 @@ billingRoutes.get('/status', authMiddleware, (req, res) =>
 );
 
 /**
+ * DELETE /billing/subscription
+ * Cancel current subscription for authenticated company
+ * @requires auth
+ */
+billingRoutes.delete('/subscription', authMiddleware, (req, res) =>
+  ControllersFactory.cancelSubscriptionController().handle(req, res)
+);
+
+/**
  * POST /billing/webhook
  * Receives webhook from AbacatePay for subscription updates
  * @public

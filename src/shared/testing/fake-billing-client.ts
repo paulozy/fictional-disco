@@ -15,7 +15,12 @@ export class FakeBillingClient implements BillingClient {
     };
   }
 
-  async handleWebhook(payload: any): Promise<void> {
-    // Fake implementation
+  async cancelSubscription(subscriptionId: string): Promise<void> {
+    // Fake implementation - do nothing
+  }
+
+  async handleWebhook<T>(payload: any, sig: string): Promise<T> {
+    // Fake implementation - return payload as is
+    return payload as T;
   }
 }

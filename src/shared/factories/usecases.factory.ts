@@ -31,6 +31,7 @@ import { DeleteShiftUseCase } from '../../modules/shifts/usecases/delete-shift.u
 import { AuthenticateUserUseCase } from '../../modules/auth/usecases/authenticate-user.usecase';
 
 // Billing
+import { CancelSubscriptionUseCase } from '../../modules/billing/usecases/cancel-subscription.usecase';
 import { CreateCheckoutUseCase } from '../../modules/billing/usecases/create-checkout.usecase';
 import { GetSubscriptionStatusUseCase } from '../../modules/billing/usecases/get-subscription-status.usecase';
 import { HandleWebhookUseCase } from '../../modules/billing/usecases/handle-webhook.usecase';
@@ -153,6 +154,13 @@ export class UseCasesFactory {
   static getSubscriptionStatusUseCase(): GetSubscriptionStatusUseCase {
     return new GetSubscriptionStatusUseCase(
       RepositoriesFactory.getSubscriptionsRepository(),
+    );
+  }
+
+  static cancelSubscriptionUseCase(): CancelSubscriptionUseCase {
+    return new CancelSubscriptionUseCase(
+      RepositoriesFactory.getSubscriptionsRepository(),
+      BillingClientFactory.getInstance(),
     );
   }
 }

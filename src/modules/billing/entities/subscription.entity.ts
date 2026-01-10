@@ -1,7 +1,7 @@
 import { BaseEntity, BaseEntityProps } from '../../../shared/entities/base-entity.entity';
 
 export type PlanType = 'FREE' | 'PRO';
-export type SubscriptionStatus = 'ACTIVE' | 'INACTIVE';
+export type SubscriptionStatus = 'ACTIVE' | 'INACTIVE' | 'CANCELLED' | 'PAST_DUE';
 
 export interface SubscriptionProps extends BaseEntityProps {
   companyId: string;

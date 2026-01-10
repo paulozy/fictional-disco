@@ -1,3 +1,5 @@
+import { PlanType } from '../../../shared/billing/plan-type.enum';
+import { SubscriptionStatus } from '../../../shared/billing/subscription-status.enum';
 import { UseCase } from '../../../shared/usecases/base-use-case';
 import { SubscriptionsRepository } from '../repositories/subscriptions-repository.interface';
 
@@ -8,8 +10,8 @@ export interface GetSubscriptionStatusRequest {
 export interface GetSubscriptionStatusResponse {
   id: string;
   companyId: string;
-  plan: 'FREE' | 'PRO';
-  status: 'ACTIVE' | 'INACTIVE';
+  plan: PlanType;
+  status: SubscriptionStatus;
   paymentGatewayCustomerId?: string;
   paymentGatewaySubscriptionId?: string;
   createdAt: Date;
@@ -25,8 +27,8 @@ export class GetSubscriptionStatusUseCase implements UseCase<GetSubscriptionStat
       return {
         id: '',
         companyId: request.companyId,
-        plan: 'FREE',
-        status: 'ACTIVE',
+        plan: PlanType.FREE,
+        status: SubscriptionStatus.ACTIVE,
         createdAt: new Date(),
       };
     }
@@ -34,8 +36,8 @@ export class GetSubscriptionStatusUseCase implements UseCase<GetSubscriptionStat
     return {
       id: subscription.id,
       companyId: subscription.companyId,
-      plan: subscription.plan,
-      status: subscription.status,
+      plan: subscription.plan as PlanType,
+      status: subscription.status as SubscriptionStatus,
       paymentGatewayCustomerId: subscription.paymentGatewayCustomerId,
       paymentGatewaySubscriptionId: subscription.paymentGatewaySubscriptionId,
       createdAt: subscription.createdAt,

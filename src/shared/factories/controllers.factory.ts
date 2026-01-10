@@ -31,6 +31,7 @@ import { AuthenticateUserController } from '../../modules/auth/controllers/authe
 import { CreateCheckoutController } from '../../modules/billing/controllers/create-checkout.controller';
 import { GetSubscriptionStatusController } from '../../modules/billing/controllers/get-subscription-status.controller';
 import { WebhookController } from '../../modules/billing/controllers/webhook.controller';
+import { CancelSubscriptionController } from '../../modules/billing/controllers/cancel-subscription.controller';
 
 export class ControllersFactory {
   // Companies
@@ -121,6 +122,12 @@ export class ControllersFactory {
   static getSubscriptionStatusController(): GetSubscriptionStatusController {
     return new GetSubscriptionStatusController(
       UseCasesFactory.getSubscriptionStatusUseCase(),
+    );
+  }
+
+  static cancelSubscriptionController(): CancelSubscriptionController {
+    return new CancelSubscriptionController(
+      UseCasesFactory.cancelSubscriptionUseCase(),
     );
   }
 }
