@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { authMiddleware } from '../../infra/http/middlewares/auth.middleware';
+import { paywallMiddleware } from '../../infra/http/middlewares/paywall.middleware';
 import { ControllersFactory } from '../../shared/factories/controllers.factory';
 
 const employeesRouter = Router();
 
-employeesRouter.post('/', authMiddleware, async (req, res) => {
+employeesRouter.post('/', authMiddleware, paywallMiddleware({ requiredFeature: 'maxEmployees' }), async (req, res) => {
   const controller = ControllersFactory.createEmployeeController();
   const httpResponse = await controller.handle(req);
   res.status(httpResponse.statusCode).json(httpResponse.body);

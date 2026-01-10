@@ -750,21 +750,95 @@ Se a empresa não tem subscription (plano FREE):
 - **Chave necessária:** `BILLING_API_KEY` (Secret Key do Stripe)
 - **Variáveis de ambiente:**
   - `BILLING_API_KEY` - Secret key do Stripe
+  - `BILLING_WEBHOOK_SECRET` - Webhook Signing Secret
+  - `BILLING_PRO_PLAN_PRICE_ID` - ID do plano PRO no Stripe
   - `BILLING_SUCCESS_URL` - URL de redirecionamento após sucesso
   - `BILLING_CANCEL_URL` - URL de redirecionamento após cancelamento
 - **Webhook:** Configure o Stripe para enviar eventos para `{seu_dominio}/billing/webhook`
 
 ---
 
+## 💳 Planos e Paywall
+
+O sistema implementa validação de planos através do middleware **Paywall**. Todos os usuários começam com o plano **FREE** e podem fazer upgrade para **PRO**.
+
+### Planos Disponíveis
+
+#### 📦 FREE
+- **Máximo de Funcionários:** 5
+- **Auto-generate Schedule:** ❌ Não disponível
+- **Suporte:** Basic
+- **Preço:** R$ 0,00/mês
+
+#### ⭐ PRO
+- **Máximo de Funcionários:** Ilimitado
+- **Auto-generate Schedule:** ✅ Disponível
+- **Suporte:** Priority
+- **Preço:** R$ 29,00/mês
+
+### Rotas Protegidas por Paywall
+
+#### 1. Auto-generate Schedule (Requer PRO)
+```
+POST /schedules/:scheduleId/auto-generate
+Authorization: Bearer <token>
+```
+**Proteção:** Requer plano **PRO**
+
+**Erro de Paywall (403):**
+```json
+{
+  "error": "FEATURE_NOT_AVAILABLE",
+  "message": "This feature requires PRO plan. Current plan: FREE",
+  "currentPlan": "FREE",
+  "requiredPlan": "PRO"
+}
+```
+
+#### 2. Criar Funcionário (Valida Limite)
+```
+POST /employees
+Authorization: Bearer <token>
+```
+**Proteção:** Valida limite de funcionários conforme plano
+
+- **FREE:** Máximo 5 funcionários
+- **PRO:** Ilimitado
+
+**Erro de Paywall (403):**
+```json
+{
+  "error": "FEATURE_NOT_AVAILABLE",
+  "message": "Feature \"maxEmployees\" is not available in FREE plan",
+  "currentPlan": "FREE",
+  "requiredPlan": "PRO"
+}
+```
+
+### Erros de Paywall
+
+O middleware retorna erros padronizados para o frontend:
+
+| Erro | Código HTTP | Descrição |
+|------|-------------|-----------|
+| `FEATURE_NOT_AVAILABLE` | 403 | Feature não está disponível no plano atual |
+| `PLAN_LIMIT_EXCEEDED` | 403 | Limite de recursos do plano foi atingido |
+| `INVALID_SUBSCRIPTION` | 403 | Subscription não está ativa |
+| `UNAUTHORIZED` | 401 | Usuário não autenticado |
+
+---
+
 ## ⚠️ Notas Importantes
 
-1. **Token JWT**: Válido por 24 horas
-2. **Workdays**: Array de números 0-6 (0=domingo, 1=segunda, etc)
-3. **Horários**: Formato HH:MM em 24h
-4. **Email**: Deve ser único no sistema
-5. **Senhas**: Mínimo recomendado de 8 caracteres
-6. **CompanyId**: Obrigatório para criar usuários e funcionários
-7. **Soft Delete**: Funcionários são desativados, não deletados
+- **Token JWT**: Válido por 24 horas
+- **Workdays**: Array de números 0-6 (0=domingo, 1=segunda, etc)
+- **Horários**: Formato HH:MM em 24h
+- **Email**: Deve ser único no sistema
+- **Senhas**: Mínimo recomendado de 8 caracteres
+- **CompanyId**: Obrigatório para criar usuários e funcionários
+- **Soft Delete**: Funcionários são desativados, não deletados
+- **Planos**: Todos os usuários iniciam com plano FREE
+- **Paywall**: Algumas rotas validam o plano do usuário e retornam 403 se não permitido
 
 ---
 
@@ -774,6 +848,11 @@ Se a empresa não tem subscription (plano FREE):
 - Verifique se o token está correto
 - Token expirou? Faça login novamente
 - Incluiu "Bearer " antes do token?
+
+### Erro 403: FEATURE_NOT_AVAILABLE
+- Seu plano não permite essa ação
+- Faça upgrade para o plano PRO em `/billing/checkout`
+- Verifique qual plano é necessário na documentação acima
 
 ### Erro 400: Campos Obrigatórios
 - Verifique a documentação acima para ver quais campos são obrigatórios
@@ -786,5 +865,5 @@ Se a empresa não tem subscription (plano FREE):
 ---
 
 **Versão**: 1.0.0  
-**Última Atualização**: 09/01/2026  
+**Última Atualização**: 10/01/2026  
 **Status**: ✅ Em Produção

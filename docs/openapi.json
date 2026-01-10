@@ -118,10 +118,48 @@
           "id": { "type": "string", "format": "uuid" },
           "companyId": { "type": "string", "format": "uuid" },
           "plan": { "type": "string", "enum": ["FREE", "PRO"] },
-          "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE"] },
+          "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE", "CANCELLED", "PAST_DUE"] },
           "paymentGatewayCustomerId": { "type": "string", "nullable": true },
           "paymentGatewaySubscriptionId": { "type": "string", "nullable": true },
           "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "PlanLimits": {
+        "type": "object",
+        "properties": {
+          "maxEmployees": { "type": ["integer", "string"], "description": "Número máximo de funcionários ou 'unlimited'" },
+          "autoGenerateSchedule": { "type": "boolean" },
+          "supportLevel": { "type": "string", "enum": ["basic", "priority"] }
+        }
+      },
+      "PlanInfo": {
+        "type": "object",
+        "properties": {
+          "FREE": {
+            "type": "object",
+            "properties": {
+              "maxEmployees": { "type": "integer", "example": 5 },
+              "autoGenerateSchedule": { "type": "boolean", "example": false },
+              "supportLevel": { "type": "string", "example": "basic" }
+            }
+          },
+          "PRO": {
+            "type": "object",
+            "properties": {
+              "maxEmployees": { "type": "string", "example": "unlimited" },
+              "autoGenerateSchedule": { "type": "boolean", "example": true },
+              "supportLevel": { "type": "string", "example": "priority" }
+            }
+          }
+        }
+      },
+      "PaywallError": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string", "enum": ["FEATURE_NOT_AVAILABLE", "PLAN_LIMIT_EXCEEDED", "INVALID_SUBSCRIPTION", "UNAUTHORIZED"] },
+          "message": { "type": "string" },
+          "currentPlan": { "type": "string", "enum": ["FREE", "PRO"], "nullable": true },
+          "requiredPlan": { "type": "string", "enum": ["FREE", "PRO"], "nullable": true }
         }
       },
       "CheckoutResponse": {
@@ -343,6 +381,7 @@
     "/employees": {
       "post": {
         "summary": "Criar Funcionário",
+        "description": "Cria um novo funcionário na empresa. O limite de funcionários varia conforme o plano: FREE (máx 5), PRO (ilimitado).",
         "tags": ["Employees"],
         "security": [{ "bearerAuth": [] }],
         "requestBody": {
@@ -371,7 +410,15 @@
             "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Employee" } } }
           },
           "400": { "description": "Validação falhou" },
-          "401": { "description": "Token inválido" }
+          "401": { "description": "Token inválido" },
+          "403": {
+            "description": "Limite de funcionários atingido para o plano atual",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaywallError" }
+              }
+            }
+          }
         }
       },
       "get": {
@@ -498,7 +545,8 @@
     },
     "/schedules/{scheduleId}/auto-generate": {
       "post": {
-        "summary": "Auto-Gerar Turnos na Escala",
+        "summary": "Auto-Gerar Turnos na Escala (Requer PRO)",
+        "description": "Gera automaticamente os turnos baseado na disponibilidade dos funcionários. Esta funcionalidade está disponível apenas para usuários com plano PRO.",
         "tags": ["Schedules"],
         "security": [{ "bearerAuth": [] }],
         "parameters": [
@@ -533,7 +581,15 @@
               }
             }
           },
-          "401": { "description": "Token inválido" },
+          "401": { "description": "Token inválido ou não autenticado" },
+          "403": {
+            "description": "Plano não permite esta funcionalidade",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PaywallError" }
+              }
+            }
+          },
           "404": { "description": "Escala ou funcionários não encontrados" }
         }
       }
