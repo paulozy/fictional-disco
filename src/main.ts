@@ -2,6 +2,7 @@ import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
 import { Database } from './infra/database/database';
+import { webhookRawBodyMiddleware } from './infra/http/middlewares/webhook-raw-body.middleware';
 import { setupRoutes } from './infra/http/routes';
 
 const app = express();
@@ -14,6 +15,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
 }));
+
+app.use(webhookRawBodyMiddleware);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

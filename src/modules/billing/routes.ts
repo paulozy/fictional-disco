@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express, { Router } from 'express';
 import { authMiddleware } from '../../infra/http/middlewares/auth.middleware';
 import { ControllersFactory } from '../../shared/factories/controllers.factory';
 
@@ -27,7 +27,7 @@ billingRoutes.get('/status', authMiddleware, (req, res) =>
  * Receives webhook from AbacatePay for subscription updates
  * @public
  */
-billingRoutes.post('/webhook', (req, res) =>
+billingRoutes.post('/webhook', express.raw({ type: 'application/json' }), (req, res) =>
   ControllersFactory.webhookController().handle(req, res)
 );
 

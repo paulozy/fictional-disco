@@ -1,20 +1,24 @@
 import { Request, Response } from 'express';
+import Stripe from 'stripe';
+import { convertStripeEventTypeToStatus } from '../../../shared/billing/convert-stripe-event-type-to-status';
+import { BillingClientFactory } from '../../../shared/factories/billing-client.factory';
 import { HandleWebhookUseCase } from '../usecases/handle-webhook.usecase';
 
 export class WebhookController {
   constructor(private handleWebhookUseCase: HandleWebhookUseCase) { }
 
   async handle(req: Request, res: Response): Promise<void> {
-    const { customerId, subscriptionId, status } = req.body;
-
-    // TODO: Verify webhook signature with AbacatePay secret
-    // For now, basic validation
-    if (!customerId || !subscriptionId || !status) {
-      res.status(400).json({ error: 'Missing required webhook fields' });
-      return;
-    }
+    const sig = req.headers['stripe-signature'] as string;
 
     try {
+      const rawBody = (req as any).rawBody;
+      const billingClient = BillingClientFactory.getInstance();
+      const event = await billingClient.handleWebhook<Stripe.Event>(rawBody, sig);
+
+      const status = convertStripeEventTypeToStatus(event.type);
+      const customerId = (event.data.object as any)['customer'];
+      const { subscriptionId } = (event.data.object as any)['metadata'];
+
       const result = await this.handleWebhookUseCase.execute({
         payload: {
           customerId,
@@ -23,7 +27,12 @@ export class WebhookController {
         },
       });
 
-      res.status(200).json(result);
+      if (!result.success) {
+        res.status(400).json({ error: result.message });
+        return;
+      }
+
+      res.status(200).json({ result });
     } catch (error) {
       res.status(500).json({ error: 'Failed to process webhook' });
     }

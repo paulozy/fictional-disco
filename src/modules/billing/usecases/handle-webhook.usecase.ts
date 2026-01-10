@@ -22,9 +22,7 @@ export class HandleWebhookUseCase implements UseCase<HandleWebhookRequest, Handl
   async execute(request: HandleWebhookRequest): Promise<HandleWebhookResponse> {
     const { payload } = request;
 
-    const subscription = await this.subscriptionsRepository.findByPaymentGatewayCustomerId(
-      payload.customerId
-    );
+    const subscription = await this.subscriptionsRepository.findById(payload.subscriptionId);
 
     if (!subscription) {
       return {

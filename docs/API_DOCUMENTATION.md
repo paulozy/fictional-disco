@@ -46,6 +46,7 @@ POST /companies/register
     "id": "uuid",
     "name": "Tech Solutions",
     "segment": "Technology",
+    "paymentGatewayCustomerId": "cus_abc123",
     "createdAt": "2026-01-09T02:00:00.000Z"
   },
   "user": {
@@ -623,7 +624,7 @@ POST /billing/checkout
 ```
 **Autenticação:** ✅ Requerida
 
-**Descrição:** Cria um checkout para upgrade para o plano PRO. Retorna um link de pagamento do AbacatePay.
+**Descrição:** Cria um link de pagamento para upgrade para o plano PRO via Stripe. Retorna um link de checkout que o cliente deve acessar para completar o pagamento.
 
 **Request Body:**
 ```json
@@ -635,8 +636,8 @@ POST /billing/checkout
 **Response (200 OK):**
 ```json
 {
-  "checkoutUrl": "https://checkout.abacatepay.com/subscription-uuid",
-  "subscriptionId": "sub-uuid"
+  "checkoutUrl": "https://checkout.stripe.com/pay/cs_...",
+  "subscriptionId": "sub-1234567890"
 }
 ```
 
@@ -647,19 +648,19 @@ POST /billing/checkout
 
 ---
 
-#### 2. Webhook de Pagamento
+#### 2. Webhook do Stripe
 ```
 POST /billing/webhook
 ```
-**Autenticação:** ❌ Não requerida (validada por signature)
+**Autenticação:** ❌ Não requerida (validada por signature do Stripe)
 
-**Descrição:** Endpoint para receber notificações do AbacatePay sobre mudanças de status de subscriptions.
+**Descrição:** Endpoint para receber notificações do Stripe sobre mudanças de status de subscriptions. O Stripe envia automaticamente webhooks quando há mudanças no status da subscription.
 
-**Request Body (enviado pelo AbacatePay):**
+**Request Body (enviado pelo Stripe):**
 ```json
 {
-  "customerId": "customer-abc123",
-  "subscriptionId": "sub-def456",
+  "customerId": "cus_abc123",
+  "subscriptionId": "sub_def456",
   "status": "ACTIVE"
 }
 ```
@@ -674,7 +675,7 @@ POST /billing/webhook
 
 **Status possíveis:**
 - `ACTIVE` - Pagamento confirmado, subscription ativa
-- `CANCELLED` - Subscription cancelada
+- `CANCELLED` - Subscription cancelada pelo cliente
 - `FAILED` - Falha no pagamento
 
 ---
@@ -685,7 +686,7 @@ GET /billing/status
 ```
 **Autenticação:** ✅ Requerida
 
-**Descrição:** Retorna o status atual da subscription da empresa autenticada.
+**Descrição:** Retorna o status atual da subscription da empresa autenticada. Se a empresa não tem uma subscription, retorna o plano FREE padrão.
 
 **Response (200 OK):**
 ```json
@@ -694,13 +695,13 @@ GET /billing/status
   "companyId": "company-uuid",
   "plan": "PRO",
   "status": "ACTIVE",
-  "paymentGatewayCustomerId": "customer-abc123",
-  "paymentGatewaySubscriptionId": "sub-def456",
+  "paymentGatewayCustomerId": "cus_abc123",
+  "paymentGatewaySubscriptionId": "sub_def456",
   "createdAt": "2026-01-09T02:00:00.000Z"
 }
 ```
 
-Se a empresa não tem subscription:
+Se a empresa não tem subscription (plano FREE):
 ```json
 {
   "id": "",
@@ -720,26 +721,38 @@ Se a empresa não tem subscription:
 ### Planos Disponíveis
 
 #### FREE (Padrão)
-- Funcionalidades básicas
-- Sem custo
-- Sem pagamento requerido
+- ✅ Gerenciamento de escalas básico
+- ✅ Até 10 funcionários
+- ✅ Suporte comunitário
+- 💰 Sem custo
 
 #### PRO
-- Funcionalidades avançadas
-- Relatórios detalhados
-- Suporte prioritário
-- Requer pagamento mensal via AbacatePay
+- ✅ Todos os recursos do FREE
+- ✅ Funcionários ilimitados
+- ✅ Relatórios avançados
+- ✅ API completa
+- ✅ Suporte prioritário
+- ✅ Integrações customizadas
+- 💰 R$ 99/mês (faturamento automático via Stripe)
 
 ---
 
-### Fluxo de Pagamento
-1. Empresa faz login
-2. Acessa `POST /billing/checkout` com `plan: "PRO"`
-3. Recebe `checkoutUrl` e abre no navegador
-4. Completa pagamento no AbacatePay
-5. AbacatePay envia webhook para `POST /billing/webhook`
-6. Sistema atualiza status para `ACTIVE`
-7. Empresa pode verificar status em `GET /billing/status`
+### Fluxo de Pagamento com Stripe
+1. Empresa autenticada acessa `POST /billing/checkout` com `plan: "PRO"`
+2. Recebe `checkoutUrl` que aponta para a página de checkout do Stripe
+3. Cliente é redirecionado para o Stripe para completar o pagamento
+4. Após pagamento bem-sucedido, Stripe envia webhook para `POST /billing/webhook`
+5. Sistema atualiza o status da subscription para `ACTIVE`
+6. Cliente pode verificar seu plano em `GET /billing/status`
+7. Renovação automática acontece mensalmente (gerenciada pelo Stripe)
+
+### Integração com Stripe
+- **Chave necessária:** `BILLING_API_KEY` (Secret Key do Stripe)
+- **Variáveis de ambiente:**
+  - `BILLING_API_KEY` - Secret key do Stripe
+  - `BILLING_SUCCESS_URL` - URL de redirecionamento após sucesso
+  - `BILLING_CANCEL_URL` - URL de redirecionamento após cancelamento
+- **Webhook:** Configure o Stripe para enviar eventos para `{seu_dominio}/billing/webhook`
 
 ---
 

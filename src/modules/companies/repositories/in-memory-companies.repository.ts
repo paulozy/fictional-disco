@@ -18,6 +18,7 @@ export class InMemoryCompaniesRepository
     return Company.create({
       name: props.name,
       segment: props.segment,
+      paymentGatewayCustomerId: props.paymentGatewayCustomerId,
     });
   }
 
@@ -26,6 +27,7 @@ export class InMemoryCompaniesRepository
       id: entity.id,
       name: props.name || entity.name,
       segment: props.segment || entity.segment,
+      paymentGatewayCustomerId: props.paymentGatewayCustomerId || entity.paymentGatewayCustomerId,
       createdAt: entity.createdAt,
     });
     return updated;

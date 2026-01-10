@@ -1,4 +1,6 @@
+import { BillingClient } from '../../../infra/billing/billing-client.interface';
 import { UseCase } from '../../../shared/usecases/base-use-case';
+import { CompaniesRepository } from '../../companies/repositories/companies-repository.interface';
 import { SubscriptionsRepository } from '../repositories/subscriptions-repository.interface';
 
 export interface CreateCheckoutRequest {
@@ -12,7 +14,11 @@ export interface CreateCheckoutResponse {
 }
 
 export class CreateCheckoutUseCase implements UseCase<CreateCheckoutRequest, CreateCheckoutResponse> {
-  constructor(private subscriptionsRepository: SubscriptionsRepository) { }
+  constructor(
+    private readonly subscriptionsRepository: SubscriptionsRepository,
+    private readonly companiesRepository: CompaniesRepository,
+    private readonly billingClient: BillingClient,
+  ) { }
 
   async execute(request: CreateCheckoutRequest): Promise<CreateCheckoutResponse> {
     const existingSubscription = await this.subscriptionsRepository.findByCompanyId(request.companyId);
@@ -29,13 +35,17 @@ export class CreateCheckoutUseCase implements UseCase<CreateCheckoutRequest, Cre
       subscription = existingSubscription;
     }
 
-    // TODO: Call AbacatePay API to generate checkout link
-    // For now, we'll return a placeholder URL
-    const checkoutUrl = `https://checkout.abacatepay.com/${subscription.id}`;
+    const company = await this.companiesRepository.findById(request.companyId);
 
-    return {
-      checkoutUrl,
-      subscriptionId: subscription.id,
-    };
+    if (!company) {
+      throw new Error('Company not found');
+    }
+
+    const checkout = await this.billingClient.createCheckout(
+      company,
+      subscription.id,
+    );
+
+    return checkout;
   }
 }

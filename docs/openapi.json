@@ -112,6 +112,32 @@
           "createdAt": { "type": "string", "format": "date-time" }
         }
       },
+      "Subscription": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "companyId": { "type": "string", "format": "uuid" },
+          "plan": { "type": "string", "enum": ["FREE", "PRO"] },
+          "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE"] },
+          "paymentGatewayCustomerId": { "type": "string", "nullable": true },
+          "paymentGatewaySubscriptionId": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "CheckoutResponse": {
+        "type": "object",
+        "properties": {
+          "checkoutUrl": { "type": "string", "format": "url" },
+          "subscriptionId": { "type": "string", "format": "uuid" }
+        }
+      },
+      "WebhookResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "message": { "type": "string" }
+        }
+      },
       "Error": {
         "type": "object",
         "properties": {
@@ -556,6 +582,119 @@
           "204": { "description": "Turno deletado com sucesso" },
           "401": { "description": "Token inválido" },
           "404": { "description": "Turno não encontrado" }
+        }
+      }
+    },
+    "/billing/checkout": {
+      "post": {
+        "summary": "Criar Checkout para Upgrade PRO",
+        "tags": ["Billing"],
+        "description": "Cria um link de pagamento para upgrade para plano PRO via Stripe",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "plan": { "type": "string", "enum": ["PRO"], "description": "Plano para upgrade" }
+                },
+                "required": ["plan"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Checkout criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "checkoutUrl": { "type": "string", "format": "url", "description": "URL do Stripe Checkout" },
+                    "subscriptionId": { "type": "string", "format": "uuid", "description": "ID da subscription" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Plano inválido ou ausente" },
+          "401": { "description": "Token não fornecido ou inválido" },
+          "500": { "description": "Erro ao gerar checkout" }
+        }
+      }
+    },
+    "/billing/status": {
+      "get": {
+        "summary": "Obter Status da Subscription",
+        "tags": ["Billing"],
+        "description": "Retorna o status atual da subscription da empresa autenticada",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Status da subscription obtido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": { "type": "string", "format": "uuid" },
+                    "companyId": { "type": "string", "format": "uuid" },
+                    "plan": { "type": "string", "enum": ["FREE", "PRO"] },
+                    "status": { "type": "string", "enum": ["ACTIVE", "INACTIVE"] },
+                    "paymentGatewayCustomerId": { "type": "string", "nullable": true },
+                    "paymentGatewaySubscriptionId": { "type": "string", "nullable": true },
+                    "createdAt": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Token não fornecido ou inválido" },
+          "500": { "description": "Erro interno do servidor" }
+        }
+      }
+    },
+    "/billing/webhook": {
+      "post": {
+        "summary": "Webhook do Stripe",
+        "tags": ["Billing"],
+        "description": "Endpoint para receber notificações do Stripe sobre mudanças de status de subscriptions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "customerId": { "type": "string", "description": "ID do customer no Stripe" },
+                  "subscriptionId": { "type": "string", "description": "ID da subscription no Stripe" },
+                  "status": { "type": "string", "enum": ["ACTIVE", "CANCELLED", "FAILED"], "description": "Novo status da subscription" }
+                },
+                "required": ["customerId", "subscriptionId", "status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook processado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Campos obrigatórios ausentes" },
+          "500": { "description": "Erro ao processar webhook" }
         }
       }
     }

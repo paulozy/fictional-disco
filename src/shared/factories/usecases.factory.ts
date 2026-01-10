@@ -1,5 +1,6 @@
 import { BcryptEncrypter } from '../cryptography/bcrypt-encrypter';
 import { JwtTokenGenerator } from '../cryptography/jwt-token-generator';
+import { BillingClientFactory } from './billing-client.factory';
 import { RepositoriesFactory } from './repositories.factory';
 
 // Companies
@@ -138,6 +139,8 @@ export class UseCasesFactory {
   static createCheckoutUseCase(): CreateCheckoutUseCase {
     return new CreateCheckoutUseCase(
       RepositoriesFactory.getSubscriptionsRepository(),
+      RepositoriesFactory.getCompaniesRepository(),
+      BillingClientFactory.getInstance(),
     );
   }
 
