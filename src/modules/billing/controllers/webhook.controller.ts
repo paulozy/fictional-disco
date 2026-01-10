@@ -18,12 +18,14 @@ export class WebhookController {
       const status = convertStripeEventTypeToStatus(event.type);
       const customerId = (event.data.object as any)['customer'];
       const { subscriptionId } = (event.data.object as any)['metadata'];
+      const gatewaySubscriptionId = (event.data.object as any)['id'];
 
       const result = await this.handleWebhookUseCase.execute({
         payload: {
           customerId,
           subscriptionId,
           status,
+          gatewaySubscriptionId,
         },
       });
 

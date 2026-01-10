@@ -6,6 +6,7 @@ export interface WebhookPayload {
   customerId: string;
   subscriptionId: string;
   status: 'ACTIVE' | 'CANCELLED' | 'FAILED';
+  gatewaySubscriptionId?: string;
 }
 
 export interface HandleWebhookRequest {
@@ -57,7 +58,7 @@ export class HandleWebhookUseCase implements UseCase<HandleWebhookRequest, Handl
 
       await this.subscriptionsRepository.update(subscription.id, {
         status: newStatus as 'ACTIVE' | 'INACTIVE',
-        paymentGatewaySubscriptionId: payload.subscriptionId,
+        paymentGatewaySubscriptionId: payload.gatewaySubscriptionId,
       });
 
       this.logger.success('Webhook processed successfully', {

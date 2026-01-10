@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '../../infra/http/middlewares/auth.middleware';
 import { paywallMiddleware } from '../../infra/http/middlewares/paywall.middleware';
-import { PlanType } from '../../shared/billing/plan-type.enum';
 import { ControllersFactory } from '../../shared/factories/controllers.factory';
 
 const schedulesRouter = Router();
@@ -18,7 +17,7 @@ schedulesRouter.get('/:weekStart', authMiddleware, async (req, res) => {
   res.status(httpResponse.statusCode).json(httpResponse.body);
 });
 
-schedulesRouter.post('/:scheduleId/auto-generate', authMiddleware, paywallMiddleware({ requiredPlan: PlanType.PRO }), async (req, res) => {
+schedulesRouter.post('/:scheduleId/auto-generate', authMiddleware, paywallMiddleware({ requiredFeature: 'autoGenerateSchedule' }), async (req, res) => {
   const controller = ControllersFactory.autoGenerateScheduleController();
   const httpResponse = await controller.handle(req);
   res.status(httpResponse.statusCode).json(httpResponse.body);

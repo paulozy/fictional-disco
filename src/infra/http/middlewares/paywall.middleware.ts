@@ -10,6 +10,10 @@ const logger = LoggerFactory.createLogger({
   action: 'Validation',
 });
 
+export interface PaywallOptions {
+  requiredFeature?: keyof typeof PLANS[PlanType.FREE];
+}
+
 /**
  * Middleware to validate user subscription against plan limits.
  * Checks if the user's plan allows the requested action.
@@ -19,14 +23,20 @@ const logger = LoggerFactory.createLogger({
  *
  * Features validated:
  * - autoGenerateSchedule: Only available in PRO plan
+ * - maxEmployees: Validates employee count against plan limits (only when requiredFeature='maxEmployees')
  *
  * Error responses:
  * - "FEATURE_NOT_AVAILABLE": Feature not included in user's current plan
+ * - "PLAN_LIMIT_REACHED": User has reached the limit for this resource
+ * 
+ * Usage:
+ * - Auto-generate schedule: paywallMiddleware({ requiredFeature: 'autoGenerateSchedule' })
+ * - Create employee: paywallMiddleware({ requiredFeature: 'maxEmployees' })
  */
-export function paywallMiddleware(): (req: Request, res: Response, next: NextFunction) => Promise<void> {
+export function paywallMiddleware(options: PaywallOptions = {}) {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
-      const { companyId } = req.user!
+      const { companyId } = req.user!;
       if (!companyId) {
         logger.warn('Paywall: Missing companyId in authenticated request');
         res.status(401).json({
@@ -35,9 +45,6 @@ export function paywallMiddleware(): (req: Request, res: Response, next: NextFun
         });
         return;
       }
-
-      const companyRepository = RepositoriesFactory.getCompaniesRepository();
-      const companyEmployeesCount = await companyRepository.findCompanyEmployeesCount(companyId);
 
       const subscriptionsRepository = RepositoriesFactory.getSubscriptionsRepository();
       const subscription = await subscriptionsRepository.findByCompanyId(companyId);
@@ -49,37 +56,56 @@ export function paywallMiddleware(): (req: Request, res: Response, next: NextFun
 
       const planLimits = PLANS[currentPlan];
 
-      if (req.path.includes('/schedules/auto-generate')) {
-        if (!planLimits.autoGenerateSchedule) {
-          logger.info('Paywall: Feature not available in current plan', {
+      logger.info('Paywall validation initiated', {
+        companyId,
+        currentPlan,
+        requiredFeature: options.requiredFeature,
+      });
+
+      // Validate required feature
+      if (options.requiredFeature) {
+        const featureValue = planLimits[options.requiredFeature];
+
+        // Handle boolean features (autoGenerateSchedule)
+        if (typeof featureValue === 'boolean' && featureValue === false) {
+          logger.warn('Paywall: Feature not available in plan', {
             companyId,
-            currentPlan,
-            feature: 'autoGenerateSchedule',
+            feature: options.requiredFeature,
+            plan: currentPlan,
           });
           res.status(403).json({
             error: 'FEATURE_NOT_AVAILABLE',
-            message: 'Auto-generate schedule feature is not available in your current plan. Please upgrade to access this feature.',
+            message: `The "${options.requiredFeature}" feature is not available in ${currentPlan} plan. Please upgrade to access this feature.`,
           });
           return;
         }
-      }
 
-      if (planLimits.maxEmployees !== 'unlimited') {
-        if (companyEmployeesCount.count >= planLimits.maxEmployees) {
-          logger.info('Paywall: Employee limit reached for current plan', {
-            companyId,
-            currentPlan,
-            maxEmployees: planLimits.maxEmployees,
-          });
-          res.status(403).json({
-            error: 'PLAN_LIMIT_REACHED',
-            message: `You have reached the maximum number of employees (${planLimits.maxEmployees}) allowed in your current plan. Please upgrade to add more employees.`,
-          });
-          return;
+        // Handle numeric limit features (maxEmployees)
+        if (options.requiredFeature === 'maxEmployees' && typeof featureValue === 'number') {
+          const companyRepository = RepositoriesFactory.getCompaniesRepository();
+          const companyEmployeesCount = await companyRepository.findCompanyEmployeesCount(companyId);
+
+          if (companyEmployeesCount.count >= featureValue) {
+            logger.warn('Paywall: Employee limit reached for current plan', {
+              companyId,
+              currentPlan,
+              maxEmployees: featureValue,
+              currentCount: companyEmployeesCount.count,
+            });
+            res.status(403).json({
+              error: 'PLAN_LIMIT_REACHED',
+              message: `You have reached the maximum number of employees (${featureValue}) allowed in your current plan. Please upgrade to add more employees.`,
+            });
+            return;
+          }
         }
       }
 
-      logger.info('Paywall: Access granted', { companyId, currentPlan, endpoint: req.path });
+      logger.info('Paywall validation passed', {
+        companyId,
+        plan: currentPlan,
+        feature: options.requiredFeature,
+      });
 
       next();
     } catch (error) {
