@@ -1,6 +1,8 @@
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from '@prisma/client';
 
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
 export class Database {
   private static instance: PrismaClient;
 
@@ -19,7 +21,7 @@ export class Database {
 
       Database.instance = new PrismaClient({
         adapter,
-        log: ['query', 'info', 'warn', 'error'],
+        log: NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
       });
     }
     return Database.instance;
