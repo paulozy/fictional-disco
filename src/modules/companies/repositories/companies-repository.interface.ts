@@ -15,4 +15,5 @@ export interface UpdateCompanyProps {
 
 export interface CompaniesRepository extends Repository<Company, CreateCompanyProps, UpdateCompanyProps> {
   findByName(name: string): Promise<Company | null>;
+  findCompanyEmployeesCount(companyId: string): Promise<{ count: number }>;
 }

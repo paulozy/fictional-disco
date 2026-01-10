@@ -56,6 +56,14 @@ export class CompaniesPrismaRepository
     });
   }
 
+  async findCompanyEmployeesCount(companyId: string): Promise<{ count: number; }> {
+    const count = await this.prisma.employee.count({
+      where: { companyId }
+    });
+
+    return { count };
+  }
+
   protected toDomain(raw: any): Company {
     return Company.create({
       id: raw.id,

@@ -6,7 +6,7 @@ export class JwtTokenGenerator implements TokenGenerator {
   private readonly secret: string;
 
   constructor(private readonly expiresIn: string = '1d') {
-    const secret = process.env.JWT_SECRET
+    const secret = process.env.JWT_SECRET;
     if (!secret) {
       throw new Error('JWT_SECRET is not defined in environment variables');
     }
@@ -32,6 +32,7 @@ export class JwtTokenGenerator implements TokenGenerator {
 
       return decoded as TokenPayload;
     } catch (error) {
+      console.log("🚀 ~ JwtTokenGenerator ~ verify ~ error:", error)
       throw new Error('Invalid or expired token');
     }
   }
