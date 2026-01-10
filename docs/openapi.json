@@ -641,6 +641,37 @@
         }
       }
     },
+    "/shifts/schedule/{scheduleId}/all": {
+      "delete": {
+        "summary": "Deletar Todos os Turnos de uma Escala",
+        "tags": ["Shifts"],
+        "description": "Deleta todos os turnos associados a uma escala de uma única vez",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "scheduleId", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" }, "description": "ID da escala" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Turnos deletados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean", "description": "Status da operação" },
+                    "deletedCount": { "type": "integer", "description": "Número de turnos deletados" }
+                  },
+                  "required": ["success", "deletedCount"]
+                }
+              }
+            }
+          },
+          "400": { "description": "Schedule ID não fornecido" },
+          "401": { "description": "Token inválido" },
+          "500": { "description": "Erro interno do servidor" }
+        }
+      }
+    },
     "/billing/checkout": {
       "post": {
         "summary": "Criar Checkout para Upgrade PRO",

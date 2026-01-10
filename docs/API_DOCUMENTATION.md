@@ -545,6 +545,32 @@ DELETE /shifts/:shiftId
 
 ---
 
+#### 3. Deletar Todos os Turnos de uma Escala
+```
+DELETE /shifts/schedule/:scheduleId/all
+```
+**Autenticação:** ✅ Requerida
+
+**Path Parameters:**
+- `scheduleId` (string, required) - ID da escala
+
+**Response (200 OK):**
+```json
+{
+  "success": true,
+  "deletedCount": 10
+}
+```
+
+**Descrição:** Deleta todos os turnos associados a uma escala de uma única vez. Retorna o número total de turnos deletados.
+
+**Erros:**
+- `400` - Schedule ID não fornecido
+- `401` - Token inválido
+- `500` - Erro interno do servidor
+
+---
+
 ## 🛠️ Health Check
 
 ```
@@ -839,13 +865,13 @@ Authorization: Bearer <token>
 ```
 **Proteção:** Requer plano **PRO**
 
+**Middleware:** `paywallMiddleware({ requiredFeature: 'autoGenerateSchedule' })`
+
 **Erro de Paywall (403):**
 ```json
 {
   "error": "FEATURE_NOT_AVAILABLE",
-  "message": "This feature requires PRO plan. Current plan: FREE",
-  "currentPlan": "FREE",
-  "requiredPlan": "PRO"
+  "message": "The \"autoGenerateSchedule\" feature is not available in FREE plan. Please upgrade to access this feature."
 }
 ```
 
@@ -856,18 +882,39 @@ Authorization: Bearer <token>
 ```
 **Proteção:** Valida limite de funcionários conforme plano
 
+**Middleware:** `paywallMiddleware({ requiredFeature: 'maxEmployees' })`
+
 - **FREE:** Máximo 5 funcionários
 - **PRO:** Ilimitado
 
-**Erro de Paywall (403):**
+**Erro quando limite atingido (403):**
 ```json
 {
-  "error": "FEATURE_NOT_AVAILABLE",
-  "message": "Feature \"maxEmployees\" is not available in FREE plan",
-  "currentPlan": "FREE",
-  "requiredPlan": "PRO"
+  "error": "PLAN_LIMIT_REACHED",
+  "message": "You have reached the maximum number of employees (5) allowed in your current plan. Please upgrade to add more employees."
 }
 ```
+
+### Funcionamento do Middleware Paywall
+
+O middleware **Paywall** funciona através de um parâmetro de opções:
+
+```typescript
+paywallMiddleware({ requiredFeature: 'featureName' })
+```
+
+**Features Disponíveis:**
+- `autoGenerateSchedule` (boolean) - Disponível apenas em PRO
+- `maxEmployees` (number) - Limite de funcionários conforme plano
+- `supportLevel` (string) - Nível de suporte conforme plano
+
+**Fluxo de Validação:**
+1. Extrai `companyId` do usuário autenticado
+2. Busca subscription da empresa
+3. Determina plano atual (FREE por padrão)
+4. Valida feature solicitada:
+   - Se boolean: verifica se está habilitada no plano
+   - Se limite numérico: conta recursos e verifica limite
 
 ### Erros de Paywall
 
@@ -876,9 +923,8 @@ O middleware retorna erros padronizados para o frontend:
 | Erro | Código HTTP | Descrição |
 |------|-------------|-----------|
 | `FEATURE_NOT_AVAILABLE` | 403 | Feature não está disponível no plano atual |
-| `PLAN_LIMIT_EXCEEDED` | 403 | Limite de recursos do plano foi atingido |
-| `INVALID_SUBSCRIPTION` | 403 | Subscription não está ativa |
-| `UNAUTHORIZED` | 401 | Usuário não autenticado |
+| `PLAN_LIMIT_REACHED` | 403 | Limite de recursos do plano foi atingido |
+| `UNAUTHORIZED` | 401 | Usuário não autenticado ou sem companyId |
 
 ---
 
