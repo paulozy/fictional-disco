@@ -1,3 +1,4 @@
+import { Logger, LoggerFactory } from '../../../shared/logger';
 import { UseCase } from '../../../shared/usecases/base-use-case';
 import { SchedulesRepository } from '../repositories/schedules-repository.interface';
 
@@ -14,19 +15,41 @@ export interface CreateScheduleResponse {
 }
 
 export class CreateScheduleUseCase implements UseCase<CreateScheduleRequest, CreateScheduleResponse> {
-  constructor(private schedulesRepository: SchedulesRepository) { }
+  private logger: Logger;
+
+  constructor(private schedulesRepository: SchedulesRepository) {
+    this.logger = LoggerFactory.createLogger({
+      module: 'Schedules',
+      action: 'CreateSchedule',
+    });
+  }
 
   async execute(request: CreateScheduleRequest): Promise<CreateScheduleResponse> {
-    const schedule = await this.schedulesRepository.create({
-      weekStart: request.weekStart,
+    this.logger.info('Creating new schedule', {
       companyId: request.companyId,
+      weekStart: request.weekStart.toISOString(),
     });
 
-    return {
-      id: schedule.id,
-      weekStart: schedule.weekStart,
-      companyId: schedule.companyId,
-      createdAt: schedule.createdAt,
-    };
+    try {
+      const schedule = await this.schedulesRepository.create({
+        weekStart: request.weekStart,
+        companyId: request.companyId,
+      });
+
+      this.logger.success('Schedule created successfully', {
+        scheduleId: schedule.id,
+        weekStart: schedule.weekStart.toISOString(),
+      });
+
+      return {
+        id: schedule.id,
+        weekStart: schedule.weekStart,
+        companyId: schedule.companyId,
+        createdAt: schedule.createdAt,
+      };
+    } catch (error) {
+      this.logger.error('Failed to create schedule', error, { companyId: request.companyId });
+      throw error;
+    }
   }
 }

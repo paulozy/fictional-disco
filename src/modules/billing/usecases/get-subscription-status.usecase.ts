@@ -1,5 +1,6 @@
 import { PlanType } from '../../../shared/billing/plan-type.enum';
 import { SubscriptionStatus } from '../../../shared/billing/subscription-status.enum';
+import { Logger, LoggerFactory } from '../../../shared/logger';
 import { UseCase } from '../../../shared/usecases/base-use-case';
 import { SubscriptionsRepository } from '../repositories/subscriptions-repository.interface';
 
@@ -18,29 +19,50 @@ export interface GetSubscriptionStatusResponse {
 }
 
 export class GetSubscriptionStatusUseCase implements UseCase<GetSubscriptionStatusRequest, GetSubscriptionStatusResponse> {
-  constructor(private subscriptionsRepository: SubscriptionsRepository) { }
+  private logger: Logger;
+
+  constructor(private subscriptionsRepository: SubscriptionsRepository) {
+    this.logger = LoggerFactory.createLogger({
+      module: 'Billing',
+      action: 'GetSubscriptionStatus',
+    });
+  }
 
   async execute(request: GetSubscriptionStatusRequest): Promise<GetSubscriptionStatusResponse> {
-    const subscription = await this.subscriptionsRepository.findByCompanyId(request.companyId);
+    this.logger.info('Fetching subscription status', { companyId: request.companyId });
 
-    if (!subscription) {
+    try {
+      const subscription = await this.subscriptionsRepository.findByCompanyId(request.companyId);
+
+      if (!subscription) {
+        this.logger.info('No subscription found, returning FREE plan', { companyId: request.companyId });
+        return {
+          id: '',
+          companyId: request.companyId,
+          plan: PlanType.FREE,
+          status: SubscriptionStatus.ACTIVE,
+          createdAt: new Date(),
+        };
+      }
+
+      this.logger.info('Subscription found', {
+        subscriptionId: subscription.id,
+        plan: subscription.plan,
+        status: subscription.status,
+      });
+
       return {
-        id: '',
-        companyId: request.companyId,
-        plan: PlanType.FREE,
-        status: SubscriptionStatus.ACTIVE,
-        createdAt: new Date(),
+        id: subscription.id,
+        companyId: subscription.companyId,
+        plan: subscription.plan as PlanType,
+        status: subscription.status as SubscriptionStatus,
+        paymentGatewayCustomerId: subscription.paymentGatewayCustomerId,
+        paymentGatewaySubscriptionId: subscription.paymentGatewaySubscriptionId,
+        createdAt: subscription.createdAt,
       };
+    } catch (error) {
+      this.logger.error('Error fetching subscription status', error, { companyId: request.companyId });
+      throw error;
     }
-
-    return {
-      id: subscription.id,
-      companyId: subscription.companyId,
-      plan: subscription.plan as PlanType,
-      status: subscription.status as SubscriptionStatus,
-      paymentGatewayCustomerId: subscription.paymentGatewayCustomerId,
-      paymentGatewaySubscriptionId: subscription.paymentGatewaySubscriptionId,
-      createdAt: subscription.createdAt,
-    };
   }
 }
