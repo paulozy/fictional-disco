@@ -11,9 +11,8 @@ export class WebhookController {
     const sig = req.headers['stripe-signature'] as string;
 
     try {
-      const rawBody = (req as any).rawBody;
       const billingClient = BillingClientFactory.getInstance();
-      const event = await billingClient.handleWebhook<Stripe.Event>(rawBody, sig);
+      const event = await billingClient.handleWebhook<Stripe.Event>(req.body, sig);
 
       const status = convertStripeEventTypeToStatus(event.type);
       const customerId = (event.data.object as any)['customer'];
@@ -36,6 +35,7 @@ export class WebhookController {
 
       res.status(200).json({ result });
     } catch (error) {
+      console.log("🚀 ~ WebhookController ~ handle ~ error:", error)
       res.status(500).json({ error: 'Failed to process webhook' });
     }
   }

@@ -3,8 +3,8 @@ import 'dotenv/config';
 import express from 'express';
 import { Database } from './infra/database/database';
 import { getCorsConfig } from './infra/http/cors.config';
-import { webhookRawBodyMiddleware } from './infra/http/middlewares/webhook-raw-body.middleware';
 import { setupRoutes } from './infra/http/routes';
+import { ControllersFactory } from './shared/factories/controllers.factory';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,7 +12,11 @@ const PORT = process.env.PORT || 3000;
 // CORS Configuration
 app.use(cors(getCorsConfig()));
 
-app.use(webhookRawBodyMiddleware);
+app.post(
+  '/billing/webhook',
+  express.raw({ type: 'application/json' }),
+  (req, res) => ControllersFactory.webhookController().handle(req, res)
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
